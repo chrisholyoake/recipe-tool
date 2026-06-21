@@ -264,36 +264,41 @@
     </div>
 
     <div class="gl-tabs">
-      <button class="gl-tab active" onclick="showGlTab('basics', this)">📋 Weekly Basics</button>
-      <button class="gl-tab" onclick="showGlTab('thisweek', this)">🧺 This Week's Meals</button>
+      <button class="gl-tab active" onclick="showGlTab('shopping', this)">🛒 Shopping List</button>
+      <button class="gl-tab" onclick="showGlTab('meals', this)">🍽 Selected Meals</button>
       <button class="gl-tab" onclick="showGlTab('manage', this)">⚙️ Manage Basics</button>
     </div>
 
-    <div id="gl-tab-basics">
-      <div class="basics-grid" id="basicsGrid"></div>
-    </div>
-
-    <div id="gl-tab-thisweek" style="display:none">
+    <!-- COMBINED SHOPPING LIST: basics + recipe ingredients, merged & deduped -->
+    <div id="gl-tab-shopping">
       <div style="background:var(--warm-white);border:1px solid var(--border);border-radius:14px;padding:1rem 1.25rem;margin-bottom:1rem;">
-        <div style="font-size:13px;font-weight:500;margin-bottom:8px;">✏️ Add a one-off item</div>
+        <div style="font-size:13px;font-weight:500;margin-bottom:8px;">✏️ Add an item</div>
         <div style="display:flex;gap:8px;">
-          <input class="field-input" id="quickAddInput" placeholder="e.g. birthday candles" onkeydown="if(event.key==='Enter')quickAdd()" />
+          <input class="field-input" id="quickAddInput" placeholder="e.g. 2 lbs ground beef" onkeydown="if(event.key==='Enter')quickAdd()" />
           <button class="icon-btn" style="padding:8px 16px;" onclick="quickAdd()">+ Add</button>
         </div>
       </div>
+      <div class="basics-grid" id="shoppingGrid"></div>
+    </div>
+
+    <!-- SELECTED MEALS: shows which recipes feed the list, with remove -->
+    <div id="gl-tab-meals" style="display:none">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:1rem;">
+        These are the meals currently contributing ingredients to your shopping list. Remove a meal here to pull its ingredients back out (anything also needed by another meal stays).
+      </div>
       <div class="section-card">
         <div class="section-header">
-          <div class="section-title">This week's ingredients (from selected meals)</div>
-          <button class="add-item-btn" onclick="clearWeekItems()">Clear all</button>
+          <div class="section-title">This week's selected meals</div>
+          <button class="add-item-btn" onclick="clearAllSelectedMeals()">Clear all</button>
         </div>
-        <div class="items-list" id="weekItemsList"></div>
+        <div class="items-list" id="selectedMealsList"></div>
       </div>
     </div>
 
     <div id="gl-tab-manage" style="display:none">
       <div class="manage-panel">
         <div class="manage-title">Manage your weekly basics</div>
-        <div class="manage-sub">Add or remove items from your permanent weekly list.</div>
+        <div class="manage-sub">These items automatically appear on your shopping list every week.</div>
         <div class="manage-grid" id="manageGrid"></div>
         <div class="manage-add-row">
           <input class="manage-input" id="manageItemInput" placeholder="New item (e.g. Greek yogurt)" onkeydown="if(event.key==='Enter')addBasicItem()" />
@@ -495,18 +500,20 @@ function loadJSON(key, fallback) {
 let meals = loadJSON('holyoakeMeals', null) || (typeof DEFAULT_MEALS !== 'undefined' ? DEFAULT_MEALS.map(m=>({...m})) : []);
 let tagLabels = loadJSON('holyoakeTagLabels', {...DEFAULT_TAG_LABELS});
 let basics = loadJSON('hgBasics', DEFAULT_BASICS.map(i=>({...i})));
-let checkedBasics = loadJSON('hgCheckedBasics', {});
-let weekItems = loadJSON('hgWeekItems', []);
-let checkedWeek = loadJSON('hgCheckedWeek', {});
-let cartMealIds = loadJSON('hgCartMealIds', []);
+let cartMealIds = loadJSON('hgCartMealIds', []);          // pending picks, not yet confirmed
+let selectedMealIds = loadJSON('hgSelectedMealIds', []);  // confirmed meals feeding the shopping list
+let manualItems = loadJSON('hgManualItems', []);          // one-off items added directly to shopping list
+let checkedShopping = loadJSON('hgCheckedShopping', {});  // checked-off state on the combined list
+let shoppingItems = [];                                    // rebuilt fresh on load / every change, not persisted directly as source of truth
 
 function saveMeals() { localStorage.setItem('holyoakeMeals', JSON.stringify(meals)); }
 function saveTagLabels() { localStorage.setItem('holyoakeTagLabels', JSON.stringify(tagLabels)); }
 function saveBasics() { localStorage.setItem('hgBasics', JSON.stringify(basics)); }
-function saveCheckedBasics() { localStorage.setItem('hgCheckedBasics', JSON.stringify(checkedBasics)); }
-function saveWeekItems() { localStorage.setItem('hgWeekItems', JSON.stringify(weekItems)); }
-function saveCheckedWeek() { localStorage.setItem('hgCheckedWeek', JSON.stringify(checkedWeek)); }
 function saveCart() { localStorage.setItem('hgCartMealIds', JSON.stringify(cartMealIds)); }
+function saveSelectedMeals() { localStorage.setItem('hgSelectedMealIds', JSON.stringify(selectedMealIds)); }
+function saveManualItems() { localStorage.setItem('hgManualItems', JSON.stringify(manualItems)); }
+function saveCheckedShopping() { localStorage.setItem('hgCheckedShopping', JSON.stringify(checkedShopping)); }
+function saveShoppingItems() { /* shoppingItems is derived/rebuilt, not persisted directly */ }
 
 let currentFilter = 'all';
 let activeModalMealId = null;
@@ -637,30 +644,6 @@ function closeCartReviewDirect() {
   document.body.style.overflow = '';
 }
 
-// CONFIRM: pull ingredients from every cart meal, consolidate duplicates,
-// push into the grocery list's "this week" section, skipping anything
-// already covered by weekly basics.
-function confirmCart() {
-  if (!cartMealIds.length) { showToast('Add some meals to your cart first'); return; }
-  let totalLines = 0;
-  const newItems = [];
-  cartMealIds.forEach(id => {
-    const m = meals.find(x=>x.id===id);
-    if (!m || !m.ingredients) return;
-    const lines = m.ingredients.split(',').map(s=>s.trim()).filter(Boolean);
-    lines.forEach(label => {
-      totalLines++;
-      newItems.push({ label, source: m.title.slice(0,22) });
-    });
-  });
-  const added = addWeekItemsDeduped(newItems);
-  const skipped = totalLines - added;
-  closeCartReviewDirect();
-  switchPage('grocery');
-  showGlTab('thisweek', document.querySelectorAll('.gl-tab')[1]);
-  showToast(`✅ ${added} ingredient${added!==1?'s':''} added to grocery list${skipped>0?` · ${skipped} duplicate${skipped!==1?'s':''} skipped`:''}`);
-}
-
 // ─── RECIPE LINKS ────────────────────────────────────────────
 function buildSearchLinks(title, searchQuery, savedUrl) {
   const q = encodeURIComponent(searchQuery || title + ' recipe');
@@ -709,7 +692,7 @@ function openModal(id) {
 }
 function updateModalCartBtn() {
   const btn = document.getElementById('modalCartBtn');
-  const inCart = cartMealIds.includes(activeModalMealId);
+  const inCart = cartMealIds.includes(activeModalMealId) || selectedMealIds.includes(activeModalMealId);
   btn.textContent = inCart ? '✓ In cart this week — tap to remove' : '+ Add to this week\'s cart';
   btn.style.background = inCart ? 'var(--green-light)' : 'var(--cream)';
   btn.style.color = inCart ? 'var(--green)' : 'var(--ink)';
@@ -746,10 +729,12 @@ function deleteMeal() {
   if (!confirm('Remove this meal from the rotation?')) return;
   meals = meals.filter(m=>m.id!==activeModalMealId);
   cartMealIds = cartMealIds.filter(id=>id!==activeModalMealId);
-  saveMeals(); saveCart();
+  selectedMealIds = selectedMealIds.filter(id=>id!==activeModalMealId);
+  saveMeals(); saveCart(); saveSelectedMeals();
   closeModalDirect();
   renderGrid();
   updateCartBar();
+  rebuildShoppingList(); renderShoppingList();
   showToast('Meal removed');
 }
 function closeModal(e) { if (e.target===document.getElementById('modalOverlay')) closeModalDirect(); }
@@ -833,133 +818,7 @@ function saveMeal() {
   showToast(`"${title}" added to rotation`);
 }
 
-// ═══════════════ GROCERY LIST LOGIC ═══════════════════════════
-function showGlTab(name, btn) {
-  ['basics','thisweek','manage'].forEach(t => {
-    document.getElementById('gl-tab-'+t).style.display = t===name ? '' : 'none';
-  });
-  document.querySelectorAll('.gl-tab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  if (name === 'manage') renderManage();
-}
-function getCategories() { return [...new Set(basics.map(i=>i.cat))]; }
-function renderBasics() {
-  const grid = document.getElementById('basicsGrid');
-  const cats = getCategories();
-  grid.innerHTML = cats.map(cat => {
-    const items = basics.filter(i=>i.cat===cat);
-    const remaining = items.filter((_,ii)=> !checkedBasics[cat+'::'+ii]).length;
-    const itemsHTML = items.map((item, ii) => {
-      const key = cat+'::'+ii;
-      const checked = !!checkedBasics[key];
-      return `<div class="item-row ${checked?'checked':''}">
-        <div class="item-check-area" onclick="toggleBasic('${escKey(key)}')">
-          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
-          <div>
-            <div class="item-label">${item.label}</div>
-            ${item.sub ? `<div class="item-sub-label">${item.sub}</div>` : ''}
-          </div>
-        </div>
-        <button class="remove-item-btn" onclick="removeBasicInline('${escKey(cat)}',${ii})">×</button>
-      </div>`;
-    }).join('');
-    const catId = 'sect-'+cat.replace(/[^a-z0-9]/gi,'_');
-    return `<div class="section-card">
-      <div class="section-header">
-        <div class="section-title">${cat}</div>
-        <span class="section-count">${remaining} left</span>
-      </div>
-      <div class="items-list">${itemsHTML}</div>
-      <div class="add-to-section">
-        <div class="add-item-row">
-          <input class="add-item-input" id="${catId}-input" placeholder="Add item..." onkeydown="if(event.key==='Enter')addItemToSection('${escKey(cat)}','${catId}-input')" />
-          <button class="add-item-btn" onclick="addItemToSection('${escKey(cat)}','${catId}-input')">+ Add</button>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
-function escKey(s){ return s.replace(/'/g,"\\'"); }
-function toggleBasic(key) { checkedBasics[key] = !checkedBasics[key]; saveCheckedBasics(); renderBasics(); }
-function removeBasicInline(cat, idx) {
-  const actualItems = basics.filter(i=>i.cat===cat);
-  const item = actualItems[idx];
-  const globalIdx = basics.indexOf(item);
-  if (globalIdx > -1) basics.splice(globalIdx, 1);
-  saveBasics(); renderBasics(); renderManage();
-}
-function addItemToSection(cat, inputId) {
-  const input = document.getElementById(inputId);
-  const val = input.value.trim();
-  if (!val) return;
-  basics.push({ cat, label: val });
-  input.value = '';
-  saveBasics(); renderBasics();
-}
-function uncheckAll() { checkedBasics = {}; checkedWeek = {}; saveCheckedBasics(); saveCheckedWeek(); renderBasics(); renderWeekItems(); }
-
-function renderManage() {
-  const grid = document.getElementById('manageGrid');
-  grid.innerHTML = basics.map((item, i) => `
-    <div class="manage-item">
-      <span>${item.label} <span style="font-size:10px;color:var(--muted)">${item.cat.replace(/[^a-zA-Z& ]/g,'').trim()}</span></span>
-      <button class="manage-remove" onclick="removeBasic(${i})">×</button>
-    </div>
-  `).join('');
-  const sel = document.getElementById('manageCatSelect');
-  sel.innerHTML = getCategories().map(c=>`<option value="${c}">${c}</option>`).join('');
-}
-function removeBasic(i) { basics.splice(i, 1); saveBasics(); renderManage(); renderBasics(); }
-function addBasicItem() {
-  const input = document.getElementById('manageItemInput');
-  const sel = document.getElementById('manageCatSelect');
-  const val = input.value.trim();
-  if (!val) return;
-  basics.push({ cat: sel.value, label: val });
-  input.value = '';
-  saveBasics(); renderManage(); renderBasics();
-}
-
-function renderWeekItems() {
-  const el = document.getElementById('weekItemsList');
-  if (!weekItems.length) {
-    el.innerHTML = '<div style="text-align:center;padding:1.5rem;font-size:13px;color:var(--muted);">No ingredients yet — select meals in the Dinner Rotation tab and confirm your cart, or add a one-off item above</div>';
-    return;
-  }
-  el.innerHTML = weekItems.map((item, i) => {
-    const checked = !!checkedWeek[i];
-    return `<div class="item-row ${checked?'checked':''}">
-      <div class="item-check-area" onclick="toggleWeekItem(${i})">
-        <div class="checkbox"><span class="checkbox-tick">✓</span></div>
-        <div class="item-label">${item.label}${item.source ? `<span class="meal-source-tag">${item.source}</span>` : ''}</div>
-      </div>
-      <button class="remove-item-btn" onclick="removeWeekItem(${i})">×</button>
-    </div>`;
-  }).join('');
-}
-function toggleWeekItem(i) { checkedWeek[i] = !checkedWeek[i]; saveCheckedWeek(); renderWeekItems(); }
-function removeWeekItem(i) {
-  weekItems.splice(i, 1);
-  const newChecked = {};
-  Object.keys(checkedWeek).forEach(k => { if (parseInt(k) < i) newChecked[k] = checkedWeek[k]; else if (parseInt(k) > i) newChecked[parseInt(k)-1] = checkedWeek[k]; });
-  checkedWeek = newChecked;
-  saveWeekItems(); saveCheckedWeek(); renderWeekItems();
-}
-function quickAdd() {
-  const input = document.getElementById('quickAddInput');
-  const val = input.value.trim();
-  if (!val) return;
-  addWeekItemsDeduped([{ label: val, source: 'manual' }]);
-  input.value = '';
-  renderWeekItems();
-}
-function clearWeekItems() {
-  if (confirm("Clear all this week's ingredients?")) {
-    weekItems = []; checkedWeek = {};
-    saveWeekItems(); saveCheckedWeek(); renderWeekItems();
-  }
-}
-// ─── QUANTITY-AWARE INGREDIENT PARSING ────────────────────────
+// ═══════════════ INGREDIENT PARSING (quantity-aware) ═══════════
 // Parses a line like "2 lbs chicken breast" into {amount, unit, name}.
 // Falls back gracefully (amount=null) for unparseable lines like "salt to taste".
 const UNIT_WORDS = ['lb','lbs','pound','pounds','oz','ounce','ounces','g','gram','grams','kg',
@@ -986,14 +845,13 @@ function unitGroup(unit) {
 const FRACTION_MAP = { '½':0.5,'⅓':0.333,'⅔':0.667,'¼':0.25,'¾':0.75,'⅕':0.2,'⅛':0.125,'⅜':0.375,'⅝':0.625,'⅞':0.875 };
 
 function parseAmount(str) {
-  // handles "2", "1.5", "1/2", "1 1/2", "½", "2-3" (takes upper bound)
   str = str.trim();
   if (FRACTION_MAP[str] !== undefined) return FRACTION_MAP[str];
-  const mixedMatch = str.match(/^(\d+)\s+(\d+)\/(\d+)$/); // "1 1/2"
+  const mixedMatch = str.match(/^(\d+)\s+(\d+)\/(\d+)$/);
   if (mixedMatch) return parseInt(mixedMatch[1]) + parseInt(mixedMatch[2])/parseInt(mixedMatch[3]);
-  const fracMatch = str.match(/^(\d+)\/(\d+)$/); // "1/2"
+  const fracMatch = str.match(/^(\d+)\/(\d+)$/);
   if (fracMatch) return parseInt(fracMatch[1])/parseInt(fracMatch[2]);
-  const rangeMatch = str.match(/^(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)$/); // "2-3"
+  const rangeMatch = str.match(/^(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)$/);
   if (rangeMatch) return parseFloat(rangeMatch[2]);
   const num = parseFloat(str);
   return isNaN(num) ? null : num;
@@ -1001,12 +859,8 @@ function parseAmount(str) {
 
 function parseIngredientLine(raw) {
   let s = raw.trim();
-  // strip leading "of" sometimes left over, normalize whitespace
   s = s.replace(/\s+/g, ' ');
-
   const unitPattern = UNIT_WORDS.join('|');
-  // Matches: [amount][optional fraction][unit] [rest as name]
-  // e.g. "2 lbs chicken breast", "1 1/2 cups rice", "3 cloves garlic, minced"
   const re = new RegExp(
     `^([\\d¼½¾⅓⅔⅕⅛⅜⅝⅞]+(?:\\s+\\d+\\/\\d+)?(?:\\/\\d+)?(?:\\s*-\\s*[\\d.]+)?)\\s*(${unitPattern})\\.?s?\\s+(.+)$`,
     'i'
@@ -1015,13 +869,11 @@ function parseIngredientLine(raw) {
   if (match) {
     const amount = parseAmount(match[1]);
     let unit = match[2].toLowerCase().replace(/\.$/,'');
-    const name = match[3].trim().replace(/,.*$/,''); // drop ", minced" etc. for matching purposes, keep original for display
+    const name = match[3].trim().replace(/,.*$/,'');
     if (amount !== null) {
       return { amount, unit, name: name.toLowerCase(), displayName: match[3].trim(), raw };
     }
   }
-  // No parseable quantity (e.g. "salt and pepper to taste", "3 garlic cloves" w/ noun-first count)
-  // Try noun-first count pattern: "3 garlic cloves" / "2 chicken breasts"
   const nounFirstRe = /^([\d¼½¾⅓⅔⅕⅛⅜⅝⅞]+(?:\s+\d+\/\d+)?(?:\/\d+)?)\s+(.+)$/;
   const nf = s.match(nounFirstRe);
   if (nf) {
@@ -1042,7 +894,6 @@ function coreIngredientName(name) {
 
 function formatAmount(n) {
   if (Number.isInteger(n)) return String(n);
-  // round to nearest 1/4 for readability, but keep 1 decimal as fallback
   const rounded = Math.round(n * 4) / 4;
   const wholePart = Math.floor(rounded);
   const fracPart = rounded - wholePart;
@@ -1058,17 +909,21 @@ function formatParsedIngredient(p) {
   return `${formatAmount(p.amount)} ${unitLabel} ${p.displayName}`;
 }
 
-// Combine a new parsed ingredient into existing weekItems, summing quantities
-// when names match and units are compatible. Returns true if merged into an
-// existing line (no new line added), false if it was added as new.
-function mergeIntoWeekItems(parsed, source) {
+// Merge a new parsed ingredient into an accumulator array, summing quantities
+// when names match and units are compatible. FIX: previously this only
+// merged when BOTH items had a parseable amount — an item with no quantity
+// (e.g. "chicken breast" with nothing else) would never merge against
+// "2 lbs chicken breast" even though they're clearly the same item. Now any
+// match on core name merges into a single line; we just don't try to sum a
+// number when one side has no quantity (we keep whichever info we have).
+function mergeIntoAccumulator(acc, parsed, source) {
   const core = coreIngredientName(parsed.name);
+  if (!core) return false;
   const group = parsed.unit ? unitGroup(parsed.unit) : null;
 
-  for (const existing of weekItems) {
-    if (!existing._parsed) continue;
+  for (const existing of acc) {
     const existingCore = coreIngredientName(existing._parsed.name);
-    if (existingCore !== core || !existingCore) continue;
+    if (existingCore !== core) continue;
 
     const existingGroup = existing._parsed.unit ? unitGroup(existing._parsed.unit) : null;
 
@@ -1077,56 +932,278 @@ function mergeIntoWeekItems(parsed, source) {
       const newBaseQty = parsed.amount * UNIT_GROUPS[group][parsed.unit];
       const existingBaseQty = existing._parsed.amount * UNIT_GROUPS[group][existing._parsed.unit];
       const totalBaseQty = newBaseQty + existingBaseQty;
-
-      // Convert back to the larger of the two original units for a tidier label
       const preferredUnit = UNIT_GROUPS[group][existing._parsed.unit] >= UNIT_GROUPS[group][parsed.unit]
         ? existing._parsed.unit : parsed.unit;
       const totalInPreferredUnit = totalBaseQty / UNIT_GROUPS[group][preferredUnit];
-
       existing._parsed = { amount: totalInPreferredUnit, unit: preferredUnit, name: parsed.name, displayName: existing._parsed.displayName };
       existing.label = formatParsedIngredient(existing._parsed);
-
-      // Track every contributing recipe by name, not just a counter
-      if (!existing.sources) existing.sources = [existing.source];
-      if (!existing.sources.includes(source)) existing.sources.push(source);
-      existing.source = existing.sources.length > 1
-        ? `${existing.sources[0]} +${existing.sources.length - 1} more`
-        : existing.sources[0];
+      addSource(existing, source);
       return true;
     }
 
-    // Same core ingredient but unparseable or incompatible units -> don't
-    // silently merge quantities (would be wrong), but avoid an exact dupe
-    if (existing._parsed.raw && existing._parsed.raw.toLowerCase() === parsed.raw.toLowerCase()) {
-      return true; // genuine exact duplicate, skip
+    // One side has a real quantity, the other doesn't (e.g. "chicken breast"
+    // with no amount vs "2 lbs chicken breast") -> same ingredient, can't
+    // sum numerically, but it's still one shopping-list line. Keep whichever
+    // side has the quantity info (more useful than a bare name).
+    if (parsed.amount !== null && existing._parsed.amount === null) {
+      existing._parsed = parsed;
+      existing.label = formatParsedIngredient(parsed);
+      addSource(existing, source);
+      return true;
     }
+    if (parsed.amount === null) {
+      // existing already has whatever info it has (possibly also no amount);
+      // just record this as another source of the same line, no label change
+      addSource(existing, source);
+      return true;
+    }
+
+    // Both have quantities but incompatible unit types (e.g. "3 cloves garlic"
+    // vs "1 tbsp garlic") -> genuinely can't combine into one number safely.
+    // Fall through to check other accumulator entries; if nothing else
+    // matches, this will be added as its own new line by the caller.
   }
-  return false; // no match found, caller should add as new
+  return false;
+}
+function addSource(item, source) {
+  if (!item.sources) item.sources = [item.source];
+  if (!item.sources.includes(source)) item.sources.push(source);
+  item.source = item.sources.length > 1
+    ? `${item.sources[0]} +${item.sources.length - 1} more`
+    : item.sources[0];
 }
 
-function addWeekItemsDeduped(newItems) {
-  const basicCores = new Set(basics.map(i => coreIngredientName(normalizeIngredient(i.label))));
-  let added = 0;
-  newItems.forEach(item => {
-    const parsed = parseIngredientLine(item.label);
-    const core = coreIngredientName(parsed.name);
+// ═══════════════ SHOPPING LIST: single source of truth ═════════
+// The combined shopping list is fully rebuilt every time from two inputs:
+//   1. basics (always included, every week)
+//   2. ingredients of every meal in selectedMealIds
+// Plus any one-off manually added items (kept separately so they survive
+// a rebuild). This avoids the entire class of "stale partial state" bugs —
+// there's never a separate "weekly basics" list and "this week" list that
+// can drift out of sync; it's one generated view.
+function rebuildShoppingList() {
+  const acc = [];
 
-    // skip anything already covered by weekly basics
-    if (basicCores.has(core) || [...basicCores].some(b => b && (core.includes(b) || b.includes(core)) && core.length > 2)) return;
-
-    const merged = mergeIntoWeekItems(parsed, item.source);
-    if (!merged) {
-      weekItems.push({ label: formatParsedIngredient(parsed), source: item.source, _parsed: parsed });
-      added++;
+  // 1. Weekly basics always go in first
+  basics.forEach(b => {
+    const parsed = parseIngredientLine(b.label);
+    parsed.displayName = b.label; // keep original casing/phrasing for basics
+    if (!mergeIntoAccumulator(acc, parsed, 'Weekly basic')) {
+      acc.push({ label: formatParsedIngredient(parsed), source: 'Weekly basic', sources: ['Weekly basic'], _parsed: parsed, isBasic: true });
     }
   });
-  saveWeekItems(); renderWeekItems();
-  return added;
+
+  // 2. Ingredients from every selected meal
+  selectedMealIds.forEach(id => {
+    const m = meals.find(x=>x.id===id);
+    if (!m || !m.ingredients) return;
+    const lines = m.ingredients.split(',').map(s=>s.trim()).filter(Boolean);
+    lines.forEach(label => {
+      const parsed = parseIngredientLine(label);
+      if (!mergeIntoAccumulator(acc, parsed, m.title)) {
+        acc.push({ label: formatParsedIngredient(parsed), source: m.title, sources: [m.title], _parsed: parsed, isBasic: false });
+      }
+    });
+  });
+
+  // 3. Manually added one-off items
+  manualItems.forEach(label => {
+    const parsed = parseIngredientLine(label);
+    if (!mergeIntoAccumulator(acc, parsed, 'Added manually')) {
+      acc.push({ label: formatParsedIngredient(parsed), source: 'Added manually', sources: ['Added manually'], _parsed: parsed, isBasic: false });
+    }
+  });
+
+  shoppingItems = acc;
+  saveShoppingItems();
 }
-function normalizeIngredient(s) {
-  return s.toLowerCase()
-    .replace(/\d+(\.\d+)?\s*(lb|lbs|oz|g|kg|cup|cups|tbsp|tsp|clove|cloves|can|cans|jar|jars|pkg|package|bunch|head|large|medium|small|fresh|dried|frozen|whole|skinless|boneless|raw|cooked|shredded|sliced|chopped|diced|minced|peeled|deveined|rinsed|drained|low.sodium|low.fat|fat.free|nonfat|organic|unsweetened|creamy)s?\b/gi,'')
-    .replace(/[^a-z ]/g,'').replace(/\s+/g,' ').trim();
+
+function renderShoppingList() {
+  const grid = document.getElementById('shoppingGrid');
+  if (!shoppingItems.length) {
+    grid.innerHTML = '<div class="empty"><h3>Your list is empty</h3><p>Add weekly basics in Manage Basics, or select meals in the Dinner Rotation tab</p></div>';
+    return;
+  }
+  // Group by category: basics keep their original category, recipe-sourced
+  // items get grouped under "From this week's meals"
+  const basicsByCat = {};
+  const fromMeals = [];
+  shoppingItems.forEach((item, i) => {
+    if (item.isBasic) {
+      const origBasic = basics.find(b => coreIngredientName(parseIngredientLine(b.label).name) === coreIngredientName(item._parsed.name));
+      const cat = origBasic ? origBasic.cat : '🥫 Other Basics';
+      if (!basicsByCat[cat]) basicsByCat[cat] = [];
+      basicsByCat[cat].push(i);
+    } else {
+      fromMeals.push(i);
+    }
+  });
+
+  let html = '';
+  Object.entries(basicsByCat).forEach(([cat, indices]) => {
+    html += renderShoppingSection(cat, indices);
+  });
+  if (fromMeals.length) {
+    html += renderShoppingSection('🍽 From This Week\'s Meals', fromMeals);
+  }
+  grid.innerHTML = html;
+}
+
+function renderShoppingSection(title, indices) {
+  const remaining = indices.filter(i => !checkedShopping[i]).length;
+  const itemsHTML = indices.map(i => {
+    const item = shoppingItems[i];
+    const checked = !!checkedShopping[i];
+    return `<div class="item-row ${checked?'checked':''}">
+      <div class="item-check-area" onclick="toggleShoppingItem(${i})">
+        <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+        <div>
+          <div class="item-label">${item.label}</div>
+          ${item.source ? `<span class="meal-source-tag">${item.source}</span>` : ''}
+        </div>
+      </div>
+      <button class="remove-item-btn" onclick="removeShoppingItem(${i})">×</button>
+    </div>`;
+  }).join('');
+  return `<div class="section-card">
+    <div class="section-header">
+      <div class="section-title">${title}</div>
+      <span class="section-count">${remaining} left</span>
+    </div>
+    <div class="items-list">${itemsHTML}</div>
+  </div>`;
+}
+
+function toggleShoppingItem(i) { checkedShopping[i] = !checkedShopping[i]; saveCheckedShopping(); renderShoppingList(); }
+
+function removeShoppingItem(i) {
+  const item = shoppingItems[i];
+  // If it's a recipe-sourced item, removing it here just removes it for
+  // this week (doesn't touch the meal or basics) — re-adds if you confirm
+  // the cart again later. If it's a basic, this is a one-time skip for
+  // this week only (use Manage Basics to remove permanently).
+  shoppingItems.splice(i, 1);
+  const newChecked = {};
+  Object.keys(checkedShopping).forEach(k => {
+    const ki = parseInt(k);
+    if (ki < i) newChecked[ki] = checkedShopping[ki];
+    else if (ki > i) newChecked[ki-1] = checkedShopping[ki];
+  });
+  checkedShopping = newChecked;
+  saveShoppingItems(); saveCheckedShopping();
+  renderShoppingList();
+}
+
+function quickAdd() {
+  const input = document.getElementById('quickAddInput');
+  const val = input.value.trim();
+  if (!val) return;
+  manualItems.push(val);
+  saveManualItems();
+  input.value = '';
+  rebuildShoppingList();
+  renderShoppingList();
+  showToast('Added to shopping list');
+}
+
+function uncheckAll() { checkedShopping = {}; saveCheckedShopping(); renderShoppingList(); }
+
+// ═══════════════ SELECTED MEALS TAB ═════════════════════════════
+function renderSelectedMeals() {
+  const el = document.getElementById('selectedMealsList');
+  if (!selectedMealIds.length) {
+    el.innerHTML = '<div style="text-align:center;padding:1.5rem;font-size:13px;color:var(--muted);">No meals selected yet — go to Dinner Rotation and tap + on any meal card</div>';
+    return;
+  }
+  el.innerHTML = selectedMealIds.map(id => {
+    const m = meals.find(x=>x.id===id);
+    if (!m) return '';
+    return `<div class="item-row">
+      <div class="item-check-area" style="cursor:default;" onclick="openModal(${id})">
+        <div style="width:16px;"></div>
+        <div>
+          <div class="item-label">${m.title}</div>
+          <div class="item-sub-label">${m.time}</div>
+        </div>
+      </div>
+      <button class="remove-item-btn" style="display:block;" onclick="removeSelectedMeal(${id})">×</button>
+    </div>`;
+  }).join('');
+}
+function removeSelectedMeal(id) {
+  selectedMealIds = selectedMealIds.filter(x=>x!==id);
+  saveSelectedMeals();
+  rebuildShoppingList();
+  renderSelectedMeals();
+  renderShoppingList();
+  renderGrid();
+  updateCartBar();
+  showToast('Meal removed — shopping list updated');
+}
+function clearAllSelectedMeals() {
+  if (!confirm('Remove all selected meals from this week?')) return;
+  selectedMealIds = [];
+  saveSelectedMeals();
+  rebuildShoppingList();
+  renderSelectedMeals();
+  renderShoppingList();
+  renderGrid();
+  updateCartBar();
+}
+
+// ═══════════════ MANAGE BASICS ═══════════════════════════════════
+function getCategories() { return [...new Set(basics.map(i=>i.cat))]; }
+function escKey(s){ return s.replace(/'/g,"\\'"); }
+function renderManage() {
+  const grid = document.getElementById('manageGrid');
+  grid.innerHTML = basics.map((item, i) => `
+    <div class="manage-item">
+      <span>${item.label} <span style="font-size:10px;color:var(--muted)">${item.cat.replace(/[^a-zA-Z& ]/g,'').trim()}</span></span>
+      <button class="manage-remove" onclick="removeBasic(${i})">×</button>
+    </div>
+  `).join('');
+  const sel = document.getElementById('manageCatSelect');
+  sel.innerHTML = getCategories().map(c=>`<option value="${c}">${c}</option>`).join('');
+}
+function removeBasic(i) {
+  basics.splice(i, 1);
+  saveBasics(); renderManage();
+  rebuildShoppingList(); renderShoppingList();
+}
+function addBasicItem() {
+  const input = document.getElementById('manageItemInput');
+  const sel = document.getElementById('manageCatSelect');
+  const val = input.value.trim();
+  if (!val) return;
+  basics.push({ cat: sel.value, label: val });
+  input.value = '';
+  saveBasics(); renderManage();
+  rebuildShoppingList(); renderShoppingList();
+}
+
+// ═══════════════ TAB SWITCHING ═══════════════════════════════════
+function showGlTab(name, btn) {
+  ['shopping','meals','manage'].forEach(t => {
+    document.getElementById('gl-tab-'+t).style.display = t===name ? '' : 'none';
+  });
+  document.querySelectorAll('.gl-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (name === 'manage') renderManage();
+  if (name === 'meals') renderSelectedMeals();
+  if (name === 'shopping') renderShoppingList();
+}
+
+// ═══════════════ CART CONFIRM (Dinner Rotation -> Shopping List) ══
+function confirmCart() {
+  if (!cartMealIds.length) { showToast('Add some meals to your cart first'); return; }
+  // Merge cart selections into the persistent selected-meals list (avoid duplicates)
+  cartMealIds.forEach(id => { if (!selectedMealIds.includes(id)) selectedMealIds.push(id); });
+  saveSelectedMeals();
+  rebuildShoppingList();
+  closeCartReviewDirect();
+  switchPage('grocery');
+  showGlTab('shopping', document.querySelectorAll('.gl-tab')[0]);
+  showToast(`✅ ${cartMealIds.length} meal${cartMealIds.length!==1?'s':''} added — shopping list updated`);
 }
 
 // ─── INIT ──────────────────────────────────────────────────
@@ -1138,8 +1215,9 @@ document.getElementById('weekOf').placeholder = monday.toLocaleDateString('en-US
 renderFilterBar();
 renderGrid();
 updateCartBar();
-renderBasics();
-renderWeekItems();
+rebuildShoppingList();
+renderShoppingList();
+renderSelectedMeals();
 renderManage();
 </script>
 </body>
