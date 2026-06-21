@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Holyoake Kitchen</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #FAF8F3; --warm-white: #FFFEF9; --ink: #1C1A16; --muted: #7A7568; --border: #E8E4DA;
+    --accent: #C4713A; --accent-light: #F5EDE5; --green: #4A7C59; --green-light: #EBF3ED;
+    --blue: #3A6B9E; --blue-light: #EBF1F8; --purple: #7B5EA7; --purple-light: #F0EBF8;
+    --rose: #C4536A; --rose-light: #FAE8EC; --gold: #B8922A; --gold-light: #F8F0DC;
+    --teal: #3A8C8C; --teal-light: #E8F4F4; --shadow-lg: 0 8px 32px rgba(28,26,22,0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; padding-bottom: 70px; }
+
+  header { background: var(--warm-white); border-bottom: 1px solid var(--border); padding: 1.1rem 1.5rem; position: sticky; top: 0; z-index: 100; }
+  .header-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .logo-title { font-family: 'Playfair Display', serif; font-size: 19px; font-weight: 600; }
+  .logo-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .header-right { display: flex; gap: 8px; align-items: center; }
+  .icon-btn { font-size: 13px; font-family: 'DM Sans', sans-serif; font-weight: 500; padding: 8px 14px; border-radius: 10px; border: none; background: var(--accent); color: #fff; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 6px; position: relative; }
+  .icon-btn:hover { background: #A85E2E; }
+  .icon-btn.secondary { background: var(--cream); color: var(--ink); border: 1px solid var(--border); }
+  .icon-btn.secondary:hover { background: var(--border); }
+  .cart-badge { position: absolute; top: -6px; right: -6px; background: var(--rose); color: #fff; font-size: 10px; font-weight: 700; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+  /* TOP NAV TABS */
+  .nav-tabs { background: var(--warm-white); border-bottom: 1px solid var(--border); padding: 0 1.5rem; position: sticky; top: 65px; z-index: 99; }
+  .nav-tabs-inner { max-width: 1200px; margin: 0 auto; display: flex; gap: 4px; }
+  .nav-tab { font-size: 13px; font-family: 'DM Sans', sans-serif; font-weight: 400; padding: 11px 18px; border: none; background: transparent; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; }
+  .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 500; }
+
+  .filter-section { background: var(--warm-white); border-bottom: 1px solid var(--border); padding: 0.85rem 1.5rem; }
+  .filter-inner { max-width: 1200px; margin: 0 auto; display: flex; gap: 7px; flex-wrap: wrap; align-items: center; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .filter-label { font-size: 10px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-right: 2px; white-space: nowrap; }
+  .chip { font-size: 12px; padding: 5px 13px; border-radius: 18px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; transition: all 0.15s; white-space: nowrap; font-family: 'DM Sans', sans-serif; flex-shrink: 0; }
+  .chip.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 500; }
+
+  .grid-section { max-width: 1200px; margin: 0 auto; padding: 1.25rem 1.5rem 3rem; }
+  .results-bar { font-size: 13px; color: var(--muted); margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+
+  /* CARD with cart toggle */
+  .card { background: var(--warm-white); border: 1px solid var(--border); border-radius: 14px; padding: 1rem 1.1rem; cursor: pointer; transition: all 0.18s; position: relative; }
+  .card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+  .card.in-cart { border-color: var(--green); background: var(--green-light); }
+  .cart-toggle { position: absolute; top: 10px; right: 10px; width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--border); background: var(--warm-white); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; color: var(--muted); z-index: 2; }
+  .card.in-cart .cart-toggle { background: var(--green); border-color: var(--green); color: #fff; }
+  .card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; padding-right: 30px; }
+  .card-title { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 600; line-height: 1.35; flex: 1; }
+  .time-pill { font-size: 10px; color: var(--muted); background: var(--cream); border-radius: 6px; padding: 2px 7px; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
+  .card-notes { font-size: 12px; color: var(--muted); line-height: 1.5; margin-bottom: 10px; }
+  .card-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+  .tag { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
+  .tag-chicken { background: #FFF0E0; color: #A05A1A; }
+  .tag-fish { background: var(--blue-light); color: var(--blue); }
+  .tag-mexican { background: var(--gold-light); color: var(--gold); }
+  .tag-bowl { background: var(--green-light); color: var(--green); }
+  .tag-med { background: var(--rose-light); color: var(--rose); }
+  .tag-asian { background: var(--teal-light); color: var(--teal); }
+  .tag-burger { background: #F0EDEA; color: #6B5A4E; }
+  .tag-crockpot { background: var(--blue-light); color: var(--blue); }
+  .tag-you { background: var(--green-light); color: var(--green); }
+  .tag-custom { background: var(--purple-light); color: var(--purple); }
+  .recipe-btn { width: 100%; font-size: 12px; font-weight: 500; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--cream); color: var(--ink); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .recipe-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* BOTTOM CART BAR (mobile-friendly persistent) */
+  .cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--ink); color: #fff; padding: 12px 1.5rem; display: none; align-items: center; justify-content: space-between; z-index: 150; box-shadow: 0 -4px 20px rgba(0,0,0,0.15); }
+  .cart-bar.show { display: flex; }
+  .cart-bar-text { font-size: 13px; }
+  .cart-bar-text strong { font-weight: 600; }
+  .cart-bar-btn { font-size: 13px; font-weight: 500; padding: 8px 18px; border-radius: 8px; border: none; background: var(--accent); color: #fff; cursor: pointer; }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(28,26,22,0.5); z-index: 200; align-items: center; justify-content: center; padding: 0.75rem; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--warm-white); border-radius: 18px; width: 100%; max-width: 640px; max-height: 92vh; overflow-y: auto; }
+  .modal-top { padding: 1.25rem 1.25rem 0.9rem; border-bottom: 1px solid var(--border); }
+  .modal-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 600; line-height: 1.25; margin-bottom: 6px; padding-right: 36px; }
+  .modal-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .modal-close { float: right; background: var(--cream); border: none; border-radius: 8px; width: 30px; height: 30px; font-size: 18px; cursor: pointer; color: var(--muted); display: flex; align-items: center; justify-content: center; margin-left: 12px; }
+  .modal-body { padding: 1.1rem 1.25rem 1.4rem; }
+  .modal-section { margin-bottom: 1.1rem; }
+  .modal-section-title { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-bottom: 8px; }
+  .ingredients-text { font-size: 14px; line-height: 1.7; }
+  .tip-box { background: var(--accent-light); border-radius: 10px; padding: 10px 14px; font-size: 13px; color: #7A3B10; line-height: 1.6; }
+  .recipe-links { display: flex; flex-direction: column; gap: 8px; }
+  .recipe-link { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; text-decoration: none; color: var(--ink); font-size: 13px; background: var(--cream); }
+  .recipe-link:hover { border-color: var(--accent); background: var(--accent-light); }
+  .recipe-link-icon { width: 30px; height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+  .recipe-link-name { font-weight: 500; }
+  .recipe-link-url { font-size: 11px; color: var(--muted); }
+  .recipe-link-arrow { color: var(--muted); font-size: 14px; margin-left: auto; }
+  .tag-edit-area { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .tag-editable { display: flex; align-items: center; gap: 4px; }
+  .tag-x { cursor: pointer; font-weight: 700; margin-left: 2px; }
+  .tag-add-select { font-size: 12px; font-family: 'DM Sans', sans-serif; padding: 4px 8px; border-radius: 8px; border: 1px dashed var(--border); background: transparent; color: var(--muted); cursor: pointer; }
+
+  /* ADD MEAL DRAWER */
+  .drawer-overlay { display: none; position: fixed; inset: 0; background: rgba(28,26,22,0.5); z-index: 300; align-items: flex-end; justify-content: center; }
+  .drawer-overlay.open { display: flex; }
+  .drawer { background: var(--warm-white); border-radius: 20px 20px 0 0; width: 100%; max-width: 600px; max-height: 92vh; overflow-y: auto; padding: 1.4rem 1.4rem 2rem; }
+  @media (min-width: 700px) { .drawer-overlay { align-items: center; } .drawer { border-radius: 20px; max-height: 88vh; } }
+  .drawer-handle { width: 36px; height: 4px; background: var(--border); border-radius: 4px; margin: 0 auto 1rem; }
+  .drawer-title { font-family: 'Playfair Display', serif; font-size: 19px; font-weight: 600; margin-bottom: 4px; }
+  .drawer-sub { font-size: 13px; color: var(--muted); margin-bottom: 1.2rem; }
+  .field-label { font-size: 12px; font-weight: 500; color: var(--ink); margin: 14px 0 6px; }
+  .field-label:first-of-type { margin-top: 0; }
+  .field-input { width: 100%; font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 10px 13px; border-radius: 10px; border: 1px solid var(--border); background: var(--cream); color: var(--ink); outline: none; }
+  .field-input:focus { border-color: var(--accent); }
+  .tag-picker { display: flex; flex-wrap: wrap; gap: 7px; }
+  .tag-option { font-size: 12px; padding: 6px 13px; border-radius: 16px; border: 1px solid var(--border); background: var(--cream); color: var(--muted); cursor: pointer; }
+  .tag-option.selected { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .custom-tag-row { display: flex; gap: 6px; margin-top: 8px; }
+  .custom-tag-input { flex: 1; font-size: 12px; padding: 6px 11px; border-radius: 16px; border: 1px dashed var(--border); background: transparent; outline: none; font-family: 'DM Sans', sans-serif; }
+  .drawer-actions { display: flex; gap: 10px; margin-top: 1.5rem; }
+  .drawer-btn { flex: 1; font-size: 14px; font-weight: 500; padding: 11px; border-radius: 10px; border: 1px solid var(--border); background: var(--cream); color: var(--ink); cursor: pointer; }
+  .drawer-btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .drawer-btn-primary:hover { background: #A85E2E; }
+  .drawer-btn:hover:not(.drawer-btn-primary) { background: var(--border); }
+
+  /* CART REVIEW MODAL */
+  .cart-review-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1rem; }
+  .cart-review-item { display: flex; align-items: center; justify-content: space-between; background: var(--cream); border-radius: 10px; padding: 10px 14px; }
+  .cart-review-name { font-size: 13px; font-weight: 500; }
+  .cart-review-remove { font-size: 18px; color: var(--muted); background: none; border: none; cursor: pointer; }
+  .cart-review-remove:hover { color: var(--rose); }
+  .cart-empty-msg { text-align: center; padding: 2rem; color: var(--muted); font-size: 13px; }
+
+  /* GROCERY LIST PAGE */
+  .gl-week-bar { background: var(--warm-white); border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .gl-week-bar label { font-size: 12px; color: var(--muted); white-space: nowrap; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; }
+  .gl-week-bar input { font-family: 'DM Sans', sans-serif; font-size: 14px; border: none; background: transparent; color: var(--ink); outline: none; flex: 1; min-width: 120px; }
+  .gl-tabs { display: flex; gap: 4px; margin-bottom: 1.25rem; background: var(--warm-white); border: 1px solid var(--border); border-radius: 12px; padding: 4px; width: fit-content; }
+  .gl-tab { font-size: 13px; font-family: 'DM Sans', sans-serif; padding: 6px 16px; border-radius: 8px; border: none; background: transparent; color: var(--muted); cursor: pointer; }
+  .gl-tab.active { background: var(--accent); color: #fff; font-weight: 500; }
+  .basics-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+  .section-card { background: var(--warm-white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+  .section-header { padding: 9px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+  .section-title { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); }
+  .section-count { font-size: 11px; color: var(--muted); }
+  .items-list { padding: 4px 0; }
+  .item-row { display: flex; align-items: center; gap: 0; padding: 0 10px; }
+  .item-row:hover { background: var(--cream); }
+  .item-check-area { display: flex; align-items: center; gap: 8px; flex: 1; padding: 7px 4px; cursor: pointer; }
+  .checkbox { width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.12s; }
+  .item-row.checked .checkbox { background: var(--accent); border-color: var(--accent); }
+  .checkbox-tick { display: none; color: #fff; font-size: 9px; font-weight: 700; }
+  .item-row.checked .checkbox-tick { display: block; }
+  .item-label { font-size: 13px; line-height: 1.4; flex: 1; }
+  .item-row.checked .item-label { text-decoration: line-through; opacity: 0.5; }
+  .item-sub-label { font-size: 10px; color: var(--muted); }
+  .remove-item-btn { font-size: 15px; color: var(--muted); background: none; border: none; cursor: pointer; padding: 4px 2px; line-height: 1; display: none; flex-shrink: 0; }
+  .item-row:hover .remove-item-btn { display: block; }
+  .remove-item-btn:hover { color: var(--accent); }
+  .add-to-section { padding: 6px 14px 10px; }
+  .add-item-row { display: flex; gap: 6px; }
+  .add-item-input { font-family: 'DM Sans', sans-serif; font-size: 12px; border: 1px solid var(--border); border-radius: 7px; padding: 5px 10px; background: var(--cream); color: var(--ink); flex: 1; outline: none; }
+  .add-item-input:focus { border-color: var(--accent); }
+  .add-item-btn { font-size: 11px; font-family: 'DM Sans', sans-serif; padding: 5px 10px; border-radius: 7px; border: 1px solid var(--border); background: var(--warm-white); color: var(--muted); cursor: pointer; white-space: nowrap; }
+  .add-item-btn:hover { background: var(--green); border-color: var(--green); color: #fff; }
+  .manage-panel { background: var(--warm-white); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem; }
+  .manage-title { font-family: 'Playfair Display', serif; font-size: 16px; margin-bottom: 4px; }
+  .manage-sub { font-size: 13px; color: var(--muted); margin-bottom: 1rem; }
+  .manage-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; margin-bottom: 1rem; }
+  .manage-item { display: flex; align-items: center; justify-content: space-between; background: var(--cream); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 13px; }
+  .manage-remove { font-size: 15px; color: var(--muted); background: none; border: none; cursor: pointer; }
+  .manage-remove:hover { color: var(--accent); }
+  .manage-add-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .manage-input { font-family: 'DM Sans', sans-serif; font-size: 13px; border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; background: var(--cream); flex: 1; outline: none; color: var(--ink); min-width: 160px; }
+  .manage-input:focus { border-color: var(--accent); }
+  .manage-cat-select { font-family: 'DM Sans', sans-serif; font-size: 13px; border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; background: var(--cream); color: var(--ink); outline: none; }
+
+  .meal-source-tag { font-size: 9px; background: var(--purple-light); color: var(--purple); border-radius: 4px; padding: 1px 6px; margin-left: 5px; font-weight: 500; }
+
+  .empty { text-align: center; padding: 4rem 2rem; color: var(--muted); }
+  .empty h3 { font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 8px; color: var(--ink); }
+
+  .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; font-size: 13px; padding: 10px 20px; border-radius: 30px; z-index: 400; opacity: 0; transition: opacity 0.25s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+
+  @media print {
+    header, .nav-tabs, .filter-section, .cart-bar, .gl-tabs, .add-to-section, .add-item-row, .remove-item-btn, .gl-week-bar input, .manage-add-row { display: none !important; }
+    body { background: white; padding-bottom: 0; }
+    .item-row.checked { display: none; }
+    .section-card { box-shadow: none; border-color: #ddd; }
+  }
+  @media (max-width: 640px) {
+    header, .nav-tabs, .filter-section, .grid-section { padding-left: 1rem; padding-right: 1rem; }
+    .logo-title { font-size: 17px; }
+    .grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .card { padding: 0.8rem 0.85rem; }
+    .card-title { font-size: 13px; }
+    .card-notes { font-size: 11px; -webkit-line-clamp: 2; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
+    .recipe-btn { font-size: 11px; padding: 6px 8px; }
+    .icon-btn span.btn-text { display: none; }
+    .icon-btn { padding: 8px 12px; }
+    .basics-grid, .manage-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 400px) { .grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="header-inner">
+    <div>
+      <div class="logo-title">🍽 Holyoake Kitchen</div>
+      <div class="logo-sub" id="headerCount">38 meals</div>
+    </div>
+    <div class="header-right">
+      <button class="icon-btn secondary" onclick="openCartReview()">
+        🛒 <span class="btn-text">Cart</span>
+        <span class="cart-badge" id="cartBadge" style="display:none">0</span>
+      </button>
+      <button class="icon-btn" onclick="openAddDrawer()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        <span class="btn-text">Add meal</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="nav-tabs">
+  <div class="nav-tabs-inner">
+    <button class="nav-tab active" id="navRotation" onclick="switchPage('rotation')">Dinner Rotation</button>
+    <button class="nav-tab" id="navGrocery" onclick="switchPage('grocery')">Grocery List</button>
+  </div>
+</div>
+
+<!-- ═══════════════ ROTATION PAGE ═══════════════ -->
+<div id="page-rotation">
+  <div class="filter-section">
+    <div class="filter-inner" id="filterBar">
+      <span class="filter-label">Filter</span>
+    </div>
+  </div>
+  <div class="grid-section">
+    <div class="results-bar">
+      <span id="resultsBar"></span>
+      <span style="font-size:12px;color:var(--muted);">Tap ✓ to add to this week's cart</span>
+    </div>
+    <div class="grid" id="grid"></div>
+    <div class="empty" id="emptyState" style="display:none">
+      <h3>No meals found</h3>
+      <p>Try a different filter, or add a new meal</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ GROCERY PAGE ═══════════════ -->
+<div id="page-grocery" style="display:none">
+  <div class="grid-section" style="padding-top:1.25rem;">
+    <div class="gl-week-bar">
+      <label>Week of</label>
+      <input type="text" id="weekOf" placeholder="" />
+      <button class="icon-btn secondary" style="font-size:12px;padding:6px 12px;" onclick="uncheckAll()">↺ Reset checks</button>
+      <button class="icon-btn" style="font-size:12px;padding:6px 12px;" onclick="window.print()">🖨 Print</button>
+    </div>
+
+    <div class="gl-tabs">
+      <button class="gl-tab active" onclick="showGlTab('basics', this)">📋 Weekly Basics</button>
+      <button class="gl-tab" onclick="showGlTab('thisweek', this)">🧺 This Week's Meals</button>
+      <button class="gl-tab" onclick="showGlTab('manage', this)">⚙️ Manage Basics</button>
+    </div>
+
+    <div id="gl-tab-basics">
+      <div class="basics-grid" id="basicsGrid"></div>
+    </div>
+
+    <div id="gl-tab-thisweek" style="display:none">
+      <div style="background:var(--warm-white);border:1px solid var(--border);border-radius:14px;padding:1rem 1.25rem;margin-bottom:1rem;">
+        <div style="font-size:13px;font-weight:500;margin-bottom:8px;">✏️ Add a one-off item</div>
+        <div style="display:flex;gap:8px;">
+          <input class="field-input" id="quickAddInput" placeholder="e.g. birthday candles" onkeydown="if(event.key==='Enter')quickAdd()" />
+          <button class="icon-btn" style="padding:8px 16px;" onclick="quickAdd()">+ Add</button>
+        </div>
+      </div>
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-title">This week's ingredients (from selected meals)</div>
+          <button class="add-item-btn" onclick="clearWeekItems()">Clear all</button>
+        </div>
+        <div class="items-list" id="weekItemsList"></div>
+      </div>
+    </div>
+
+    <div id="gl-tab-manage" style="display:none">
+      <div class="manage-panel">
+        <div class="manage-title">Manage your weekly basics</div>
+        <div class="manage-sub">Add or remove items from your permanent weekly list.</div>
+        <div class="manage-grid" id="manageGrid"></div>
+        <div class="manage-add-row">
+          <input class="manage-input" id="manageItemInput" placeholder="New item (e.g. Greek yogurt)" onkeydown="if(event.key==='Enter')addBasicItem()" />
+          <select class="manage-cat-select" id="manageCatSelect"></select>
+          <button class="icon-btn" style="padding:7px 14px;" onclick="addBasicItem()">+ Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM CART BAR -->
+<div class="cart-bar" id="cartBar">
+  <div class="cart-bar-text"><strong id="cartBarCount">0</strong> meals selected for this week</div>
+  <button class="cart-bar-btn" onclick="openCartReview()">Review & confirm →</button>
+</div>
+
+<!-- RECIPE VIEW MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-top">
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+      <div class="modal-title" id="modalTitle"></div>
+      <div class="modal-meta">
+        <span class="time-pill" id="modalTime"></span>
+        <div class="tag-edit-area" id="modalTagArea"></div>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section">
+        <div class="modal-section-title">What it is</div>
+        <div class="ingredients-text" id="modalNotes"></div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">Key ingredients</div>
+        <div class="ingredients-text" id="modalIngredients"></div>
+      </div>
+      <div class="modal-section">
+        <div class="tip-box" id="modalTip"></div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">Recipe links</div>
+        <div class="recipe-links" id="modalRecipeLinks"></div>
+      </div>
+      <div class="modal-section" style="display:flex;gap:8px;margin-bottom:0;">
+        <button class="drawer-btn" id="modalCartBtn" style="flex:1;" onclick="toggleCartFromModal()">Add to this week's cart</button>
+        <button class="drawer-btn" style="color:var(--rose);" onclick="deleteMeal()">Remove meal</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CART REVIEW MODAL -->
+<div class="modal-overlay" id="cartReviewOverlay" onclick="closeCartReview(event)">
+  <div class="modal" id="cartReviewModal">
+    <div class="modal-top">
+      <button class="modal-close" onclick="closeCartReviewDirect()">✕</button>
+      <div class="modal-title">This week's meals</div>
+      <div style="font-size:13px;color:var(--muted);">Review your picks, then confirm to build the grocery list</div>
+    </div>
+    <div class="modal-body">
+      <div class="cart-review-list" id="cartReviewList"></div>
+      <div class="drawer-actions" style="margin-top:0;">
+        <button class="drawer-btn" onclick="closeCartReviewDirect()">Keep browsing</button>
+        <button class="drawer-btn drawer-btn-primary" onclick="confirmCart()">Confirm & build grocery list</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD MEAL DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer(event)">
+  <div class="drawer" id="drawer">
+    <div class="drawer-handle"></div>
+    <div class="drawer-title">Add a meal to the rotation</div>
+    <div class="drawer-sub">Takes about 20 seconds — paste ingredients, fill in a few details</div>
+
+    <div class="field-label">Dish name</div>
+    <input class="field-input" id="addName" placeholder="e.g. Honey Garlic Salmon" />
+
+    <div class="field-label">Cook time</div>
+    <input class="field-input" id="addTime" placeholder="e.g. 25 min" />
+
+    <div class="field-label">Short description</div>
+    <input class="field-input" id="addNotes" placeholder="One line about the dish" />
+
+    <div class="field-label">Ingredients</div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:6px;">
+      Paste the ingredients list from the recipe — one per line works best.
+    </div>
+    <textarea class="field-input" id="addIngredients" rows="5" style="resize:vertical;font-family:'DM Sans',sans-serif;" placeholder="2 lbs chicken thighs&#10;1 cup jasmine rice&#10;3 cloves garlic, minced&#10;..."></textarea>
+
+    <div class="field-label">Source link (optional)</div>
+    <input class="field-input" id="addUrlInput" placeholder="https://... so you can find the full recipe later" />
+
+    <div class="field-label">Tags</div>
+    <div class="tag-picker" id="addTagPicker"></div>
+    <div class="custom-tag-row">
+      <input class="custom-tag-input" id="customTagInput" placeholder="+ custom tag..." onkeydown="if(event.key==='Enter'){addCustomTag(); event.preventDefault();}" />
+      <button class="icon-btn secondary" style="padding:6px 12px;" onclick="addCustomTag()">Add</button>
+    </div>
+
+    <div class="drawer-actions">
+      <button class="drawer-btn" onclick="closeDrawer()">Cancel</button>
+      <button class="drawer-btn drawer-btn-primary" onclick="saveMeal()">Save to rotation</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+
+const DEFAULT_MEALS = [
+  { id:1, title:"Greek Chicken Bowls", time:"25 min", tags:["chicken","bowl","med","you"], notes:"Marinated chicken breast, farro or rice, cucumber-tomato salad, store-bought tzatziki.", ingredients:"Chicken breast, farro, cucumber, cherry tomatoes, red onion, tzatziki, lemon", tip:"Can be marinated the morning of for an easier dinner.", search:"greek chicken bowl recipe" },
+  { id:2, title:"Chimichurri Chicken + Roasted Veggies", time:"30 min", tags:["chicken","bowl","you"], notes:"Sheet pan chicken breast with blender chimichurri, roasted vegetables.", ingredients:"Chicken breast, parsley, garlic, red wine vinegar, olive oil, any roasting veg", tip:"Make a big batch of chimichurri ahead — it lasts all week.", search:"chimichurri chicken sheet pan recipe" },
+  { id:3, title:"Chicken Tacos", time:"20 min", tags:["chicken","mexican","you"], notes:"Shredded chicken breast, tortillas, quick slaw, avocado, lime crema.", ingredients:"Chicken breast, tortillas, cabbage, avocado, sour cream, lime, cumin, smoked paprika", tip:"Shred chicken ahead so dinner is just assembly at the table.", search:"shredded chicken tacos recipe" },
+  { id:4, title:"Burmese Coconut Curry", time:"35 min", tags:["chicken","bowl","asian"], notes:"Chicken thighs in coconut milk curry with crispy shallots and lime over rice.", ingredients:"Chicken thighs, coconut milk, fish sauce, turmeric, ginger, garlic, rice, shallots", tip:"Mostly hands-off simmering. Tastes even better the next day.", search:"Burmese coconut chicken curry recipe" },
+  { id:5, title:"Sheet Pan Fajitas", time:"25 min", tags:["chicken","mexican","you"], notes:"Sliced chicken breast, peppers, onions on one pan. Tortillas and toppings on the side.", ingredients:"Chicken breast, bell peppers, onion, cumin, smoked paprika, tortillas, avocado, lime", tip:"Overlaps entirely with taco night ingredients.", search:"sheet pan chicken fajitas recipe" },
+  { id:6, title:"Black Bean Burrito Bowls", time:"20 min", tags:["mexican","bowl","you"], notes:"Spiced black beans, rice, avocado, salsa, cheese — vegetarian and the fastest on the list.", ingredients:"Canned black beans, rice, avocado, salsa, cumin, smoked paprika, lime, cheese", tip:"All pantry and fridge — nothing to defrost.", search:"black bean burrito bowl recipe" },
+  { id:7, title:"Salsa Verde Chicken (Stovetop)", time:"25 min", tags:["chicken","mexican"], notes:"Chicken breast braised in jarred salsa verde, served with rice and beans or tortillas.", ingredients:"Chicken breast, jarred salsa verde, chicken broth, cumin, rice or tortillas", tip:"Almost zero prep — the salsa verde does everything.", search:"salsa verde chicken stovetop recipe" },
+  { id:8, title:"Tilapia with Mango-Avocado Salsa", time:"20 min", tags:["fish","mexican","you"], notes:"Pan-seared white fish topped with bright mango salsa.", ingredients:"Tilapia or cod, mango, avocado, lime, cilantro, jalapeño", tip:"Mildest possible fish — genuinely not fishy.", search:"tilapia mango avocado salsa recipe" },
+  { id:9, title:"Fish Tacos with Chipotle Crema", time:"25 min", tags:["fish","mexican","you"], notes:"Baked white fish, slaw, chipotle crema, tortillas.", ingredients:"Tilapia or cod, tortillas, cabbage, chipotle in adobo, sour cream, lime, cilantro", tip:"Chipotle crema transforms bland white fish.", search:"baked fish tacos chipotle crema recipe" },
+  { id:10, title:"Lemon Herb Baked Salmon", time:"20 min", tags:["fish","bowl","med"], notes:"Sheet pan salmon with lemon, garlic, herbs over farro with a simple salad.", ingredients:"Salmon, lemon, garlic, olive oil, parsley or dill, farro or rice", tip:"Oven does the work — minimal hands-on time.", search:"lemon herb baked salmon recipe" },
+  { id:11, title:"Chicken Shawarma Bowls", time:"30 min", tags:["chicken","bowl","med"], notes:"Shawarma-spiced chicken breast, rice, hummus, cucumber, tomato, pickled onion.", ingredients:"Chicken breast, cumin, paprika, turmeric, cinnamon, garlic, hummus, cucumber, rice", tip:"Spice blend overlaps with Greek bowls.", search:"chicken shawarma bowl recipe" },
+  { id:12, title:"Chicken Fried Rice", time:"20 min", tags:["chicken","bowl","asian","you"], notes:"Leftover rice, chicken, eggs, soy sauce, sesame oil, frozen veg.", ingredients:"Leftover rice, chicken, eggs, soy sauce, sesame oil, frozen veg, garlic", tip:"Kid-friendly, zero grocery trip needed.", search:"easy chicken fried rice recipe" },
+  { id:13, title:"Chicken Tortilla Soup", time:"35 min", tags:["chicken","mexican"], notes:"Shredded chicken, canned tomatoes, black beans, corn, broth, tortilla chips.", ingredients:"Chicken breast, canned tomatoes, black beans, corn, chicken broth, cumin, smoked paprika, lime", tip:"Mostly pantry/shelf-stable. Makes a big batch.", search:"chicken tortilla soup recipe easy" },
+  { id:14, title:"Grain Bowls with Crispy Chickpeas", time:"25 min", tags:["bowl","med","you"], notes:"Farro base, roasted spiced chickpeas, any veg, tahini or lemon dressing.", ingredients:"Canned chickpeas, farro or rice, any roasting veg, olive oil, cumin, tahini or lemon", tip:"Best vegetarian backup night.", search:"crispy chickpea grain bowl recipe" },
+  { id:15, title:"Pesto Chicken Pasta", time:"20 min", tags:["chicken","you"], notes:"Pasta, store-bought pesto, rotisserie chicken, cherry tomatoes, parmesan.", ingredients:"Pasta, store-bought pesto, chicken, cherry tomatoes, parmesan", tip:"Keep pesto and a rotisserie chicken on hand for a 15-min dinner.", search:"pesto chicken pasta easy recipe" },
+  { id:16, title:"Lemon Chicken with Orzo + Olives", time:"30 min", tags:["chicken","med"], notes:"Browned chicken breast, orzo cooked in chicken broth, kalamata olives, lemon, herbs.", ingredients:"Chicken breast, orzo, chicken broth, kalamata olives, lemon, garlic, parsley, feta", tip:"One pan — orzo absorbs all the pan flavor.", search:"one pan lemon chicken orzo olives recipe" },
+  { id:17, title:"Spanakopita-Style Chicken", time:"30 min", tags:["chicken","med","you"], notes:"Chicken breast topped with spinach, feta, and herbs — sheet pan.", ingredients:"Chicken breast, frozen spinach, feta, garlic, lemon, olive oil, dried oregano", tip:"Frozen spinach makes this pantry-friendly.", search:"spinach feta stuffed chicken breast recipe" },
+  { id:18, title:"Lamb or Beef Kofta Bowls", time:"30 min", tags:["med","bowl"], notes:"Spiced ground meat patties, rice or farro, tzatziki, cucumber-tomato salad, pita.", ingredients:"Ground lamb or beef, cumin, coriander, garlic, parsley, farro or rice, tzatziki, pita", tip:"Spices overlap almost entirely with shawarma blend.", search:"lamb kofta bowls recipe" },
+  { id:19, title:"White Bean + Tomato Stew", time:"25 min", tags:["med","bowl","you"], notes:"Cannellini beans simmered with canned tomatoes, garlic, olive oil, fresh herbs.", ingredients:"Canned cannellini beans, canned tomatoes, garlic, olive oil, rosemary or thyme, parmesan, pita", tip:"Completely pantry-based, vegetarian, and filling.", search:"white bean tomato stew recipe" },
+  { id:20, title:"Soy-Glazed Chicken Breast + Rice", time:"25 min", tags:["chicken","asian","bowl","you"], notes:"Chicken breast in a soy-honey-garlic glaze, over rice with cucumber.", ingredients:"Chicken breast, soy sauce, honey, garlic, ginger, rice, cucumber, sesame oil", tip:"3-ingredient glaze. Add a fried egg on top for kids.", search:"soy glazed chicken breast rice bowl recipe" },
+  { id:21, title:"Ginger Scallion Noodles", time:"20 min", tags:["asian","you"], notes:"Noodles tossed in ginger-scallion-soy sauce, topped with soft-boiled egg and veg.", ingredients:"Lo mein or spaghetti noodles, scallions, ginger, soy sauce, sesame oil, egg, any veg", tip:"Scallion sauce takes 5 minutes.", search:"ginger scallion noodles recipe" },
+  { id:22, title:"Thai Peanut Chicken Bowls", time:"25 min", tags:["chicken","asian","bowl","you"], notes:"Sliced chicken breast, rice or noodles, shredded cabbage and carrots, peanut sauce.", ingredients:"Chicken breast, rice or noodles, cabbage, carrots, scallions, peanut butter, soy sauce, lime, garlic", tip:"Peanut sauce takes 3 minutes. Kid-friendly.", search:"thai peanut chicken bowl recipe" },
+  { id:23, title:"Miso Butter Salmon", time:"20 min", tags:["fish","asian"], notes:"Salmon glazed with miso-butter-soy, roasted at high heat, over rice with broccoli.", ingredients:"Salmon, white miso paste, butter, soy sauce, honey, rice, broccoli", tip:"Most flavor-per-minute meal on the list.", search:"miso butter salmon recipe" },
+  { id:24, title:"Classic Smash Burgers", time:"20 min", tags:["burger","you"], notes:"Smash patties, American cheese, brioche bun, special sauce.", ingredients:"80/20 ground beef, brioche buns, American cheese, lettuce, tomato, onion, mayo, mustard, ketchup", tip:"Needs a very hot cast iron or griddle.", search:"smash burger recipe homemade" },
+  { id:25, title:"Greek Lamb Burgers", time:"25 min", tags:["burger","med","you"], notes:"Ground lamb patties with feta and herbs, tzatziki, tomato, red onion.", ingredients:"Ground lamb, feta, garlic, dried oregano, tzatziki, pita or brioche, tomato, red onion", tip:"Feta mixed into the patty keeps them juicy.", search:"greek lamb burger recipe feta" },
+  { id:26, title:"Salsa Verde Chicken (Crockpot)", time:"10 min prep", tags:["chicken","mexican","crockpot"], notes:"Chicken breast, Herdez salsa verde, cream cheese, cumin. Dump and go.", ingredients:"2 lbs chicken breast, salsa verde, cream cheese, garlic, cumin, salt & pepper", tip:"Cream cheese makes it rich without being heavy.", search:"crockpot salsa verde chicken recipe" },
+  { id:27, title:"Chicken Enchilada Bowls (Crockpot)", time:"10 min prep", tags:["chicken","mexican","bowl","crockpot"], notes:"Chicken breast, enchilada sauce, bell peppers, green chiles, taco seasoning.", ingredients:"2 lbs chicken breast, enchilada sauce, bell peppers, green chiles, taco seasoning, onion", tip:"Totally hands-off. Serve over jasmine rice.", search:"crockpot chicken enchilada bowls recipe" },
+  { id:28, title:"White Chicken Chili", time:"35 min", tags:["chicken","mexican"], notes:"Shredded chicken, white beans, green chiles, cream cheese, Greek yogurt.", ingredients:"Shredded chicken, white beans, green chiles, chicken broth, cream cheese, Greek yogurt, cumin, chili powder, lime", tip:"Use rotisserie chicken to make this faster.", search:"white chicken chili recipe easy" },
+  { id:29, title:"Thai Peanut Crockpot Chicken", time:"10 min prep", tags:["chicken","asian","bowl","crockpot"], notes:"Chicken breast slow-cooked in peanut butter, coconut milk, soy sauce, honey, sriracha.", ingredients:"3 lbs chicken breast, peanut butter, coconut milk, soy sauce, honey, rice vinegar, sriracha, garlic, ginger, lime", tip:"One of the highest-protein options.", search:"crockpot thai peanut chicken recipe" },
+  { id:30, title:"Sesame Chicken (Crockpot)", time:"10 min prep", tags:["chicken","asian","bowl","crockpot"], notes:"Chicken breast in soy-honey-sesame-ginger glaze with bell peppers and snap peas.", ingredients:"2 lbs chicken breast, soy sauce, honey, sesame oil, garlic, ginger, rice vinegar, bell peppers, snap peas", tip:"Add veggies in the last 30-45 min so they stay crisp.", search:"crockpot sesame chicken recipe" },
+  { id:31, title:"BBQ Pulled Chicken (Crockpot)", time:"5 min prep", tags:["chicken","bowl","crockpot","you"], notes:"Chicken breast, low-sugar BBQ sauce, apple cider vinegar.", ingredients:"2 lbs chicken breast, low-sugar BBQ sauce, apple cider vinegar, garlic powder", tip:"Easiest crockpot meal on the list.", search:"crockpot BBQ pulled chicken recipe" },
+  { id:32, title:"Buffalo Chicken (Crockpot)", time:"5 min prep", tags:["chicken","bowl","crockpot","you"], notes:"Chicken breast, Frank's RedHot, broth, garlic powder.", ingredients:"2 lbs chicken breast, Frank's RedHot, chicken broth, garlic powder, onion powder", tip:"Serve over rice with ranch drizzle.", search:"crockpot buffalo chicken recipe" },
+  { id:33, title:"Teriyaki Chicken Bowl (Crockpot)", time:"10 min prep", tags:["chicken","asian","bowl","crockpot"], notes:"Chicken thighs in homemade teriyaki, shredded over jasmine rice with yum-yum sauce.", ingredients:"3 lbs chicken thighs, liquid aminos, soy sauce, mirin, honey, cornstarch, jasmine rice, mayo, Greek yogurt, sriracha", tip:"Yum-yum sauce is what makes it. Kid-friendly.", search:"crockpot teriyaki chicken bowl recipe" },
+  { id:34, title:"Teriyaki Meatballs (Crockpot)", time:"15 min prep", tags:["bowl","asian","crockpot"], notes:"Lean ground beef meatballs in homemade teriyaki sauce, over rice.", ingredients:"2 lbs lean ground beef, egg, breadcrumbs, garlic powder, liquid aminos, soy sauce, mirin, honey", tip:"Great change of pace from chicken.", search:"crockpot teriyaki meatballs recipe" },
+  { id:35, title:"Protein Chicken Pasta (Crockpot)", time:"10 min prep", tags:["chicken","crockpot"], notes:"Chicken slow-cooked in tomato-basil sauce, mixed with protein pasta and cottage cheese sauce.", ingredients:"Chicken, kale, cottage cheese, tomato-basil sauce, protein pasta, cayenne, garlic salt, onion powder", tip:"Tastes like a cream sauce — high protein.", search:"high protein chicken pasta crockpot recipe" },
+  { id:36, title:"Chicken Alfredo (Crockpot)", time:"10 min prep", tags:["chicken","crockpot"], notes:"Chicken breast in lemon-parmesan broth, mixed with protein pasta and Alfredo sauce.", ingredients:"Chicken breast, parmesan, lemon, butter, garlic powder, protein pasta, cottage cheese, cream cheese, milk", tip:"Surprisingly creamy. Good on a heavier activity day.", search:"healthy chicken alfredo crockpot recipe" },
+  { id:37, title:"Sheet Pan Salmon + Veggies", time:"30 min", tags:["fish","you"], notes:"Salmon fillets with broccoli, zucchini, bell pepper at 400°F.", ingredients:"Salmon fillets, broccoli, zucchini, bell pepper, olive oil, garlic powder, paprika, lemon", tip:"One of the simplest fish dinners — oven does everything.", search:"sheet pan salmon vegetables recipe" },
+  { id:38, title:"Turkey Meatballs + Potatoes", time:"30 min", tags:["you"], notes:"Ground turkey meatballs, baby potatoes, green beans on one sheet pan.", ingredients:"Ground turkey, egg, panko breadcrumbs, garlic powder, Italian seasoning, baby potatoes, green beans, olive oil", tip:"Add green beans in the last 15 min so they don't overcook.", search:"turkey meatballs sheet pan potatoes green beans" }
+];
+const DEFAULT_TAG_LABELS = {
+  chicken:["tag-chicken","🍗 Chicken"], fish:["tag-fish","🐟 Fish"], mexican:["tag-mexican","🌮 Mexican"],
+  bowl:["tag-bowl","🥣 Bowl"], med:["tag-med","🫒 Mediterranean"], asian:["tag-asian","🥢 Asian"],
+  burger:["tag-burger","🍔 Burger"], crockpot:["tag-crockpot","🫕 Crockpot"], you:["tag-you","✨ Your night"]
+};
+
+const DEFAULT_BASICS = [
+  { cat:"🥖 Bread & Dairy", label:"Sourdough bread" },
+  { cat:"🥖 Bread & Dairy", label:"Dave's Killer Bread" },
+  { cat:"🥖 Bread & Dairy", label:"Whole milk" },
+  { cat:"🥖 Bread & Dairy", label:"Half & half", sub:"not every week" },
+  { cat:"🥖 Bread & Dairy", label:"Eggs" },
+  { cat:"🥖 Bread & Dairy", label:"Butter" },
+  { cat:"🥖 Bread & Dairy", label:"Sliced cheese" },
+  { cat:"🥣 Yogurt & Protein", label:"Oikos yogurt" },
+  { cat:"🥣 Yogurt & Protein", label:"Regular yogurt" },
+  { cat:"🥣 Yogurt & Protein", label:"Cottage cheese" },
+  { cat:"🥣 Yogurt & Protein", label:"Deli turkey" },
+  { cat:"🥣 Yogurt & Protein", label:"Rotisserie chicken" },
+  { cat:"🥑 Produce", label:"Bananas" },
+  { cat:"🥑 Produce", label:"Apples" },
+  { cat:"🥑 Produce", label:"Berries" },
+  { cat:"🥑 Produce", label:"Avocados" },
+  { cat:"🥑 Produce", label:"Cherry tomatoes" },
+  { cat:"🥑 Produce", label:"Salad greens / butter lettuce" },
+  { cat:"🥑 Produce", label:"Red onion" },
+  { cat:"🥑 Produce", label:"Lemons / limes" },
+  { cat:"🥫 Pantry Staples", label:"Olive oil" },
+  { cat:"🥫 Pantry Staples", label:"Garlic" },
+  { cat:"🥫 Pantry Staples", label:"Amy's burritos", sub:"freezer backup" },
+  { cat:"🥫 Pantry Staples", label:"Canned black beans" },
+  { cat:"🥫 Pantry Staples", label:"Rice or farro" },
+  { cat:"🥫 Pantry Staples", label:"Soy sauce / liquid aminos" },
+  { cat:"🥫 Pantry Staples", label:"Tortillas" },
+  { cat:"🥫 Pantry Staples", label:"Parmesan" },
+  { cat:"🍷 Drinks & Other", label:"Sparkling water" },
+  { cat:"🍷 Drinks & Other", label:"Wine" },
+  { cat:"🍷 Drinks & Other", label:"Coffee / creamer" },
+];
+
+// ─── STATE ─────────────────────────────────────────────────
+function loadJSON(key, fallback) {
+  try { const v = JSON.parse(localStorage.getItem(key)); return v || fallback; }
+  catch(e) { return fallback; }
+}
+let meals = loadJSON('holyoakeMeals', null) || (typeof DEFAULT_MEALS !== 'undefined' ? DEFAULT_MEALS.map(m=>({...m})) : []);
+let tagLabels = loadJSON('holyoakeTagLabels', {...DEFAULT_TAG_LABELS});
+let basics = loadJSON('hgBasics', DEFAULT_BASICS.map(i=>({...i})));
+let checkedBasics = loadJSON('hgCheckedBasics', {});
+let weekItems = loadJSON('hgWeekItems', []);
+let checkedWeek = loadJSON('hgCheckedWeek', {});
+let cartMealIds = loadJSON('hgCartMealIds', []);
+
+function saveMeals() { localStorage.setItem('holyoakeMeals', JSON.stringify(meals)); }
+function saveTagLabels() { localStorage.setItem('holyoakeTagLabels', JSON.stringify(tagLabels)); }
+function saveBasics() { localStorage.setItem('hgBasics', JSON.stringify(basics)); }
+function saveCheckedBasics() { localStorage.setItem('hgCheckedBasics', JSON.stringify(checkedBasics)); }
+function saveWeekItems() { localStorage.setItem('hgWeekItems', JSON.stringify(weekItems)); }
+function saveCheckedWeek() { localStorage.setItem('hgCheckedWeek', JSON.stringify(checkedWeek)); }
+function saveCart() { localStorage.setItem('hgCartMealIds', JSON.stringify(cartMealIds)); }
+
+let currentFilter = 'all';
+let activeModalMealId = null;
+let drawerSelectedTags = [];
+const tagColorClasses = ['tag-chicken','tag-fish','tag-mexican','tag-bowl','tag-med','tag-asian','tag-burger','tag-crockpot','tag-you','tag-custom'];
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+// ─── PAGE NAV ────────────────────────────────────────────────
+function switchPage(page) {
+  document.getElementById('page-rotation').style.display = page==='rotation' ? '' : 'none';
+  document.getElementById('page-grocery').style.display = page==='grocery' ? '' : 'none';
+  document.getElementById('navRotation').classList.toggle('active', page==='rotation');
+  document.getElementById('navGrocery').classList.toggle('active', page==='grocery');
+}
+
+// ─── FILTER BAR ──────────────────────────────────────────────
+function renderFilterBar() {
+  const bar = document.getElementById('filterBar');
+  const allTags = Object.keys(tagLabels);
+  bar.innerHTML = '<span class="filter-label">Filter</span>' +
+    `<button class="chip ${currentFilter==='all'?'active':''}" onclick="filter('all',this)">All</button>` +
+    allTags.map(t => `<button class="chip ${currentFilter===t?'active':''}" onclick="filter('${t}',this)">${tagLabels[t][1]}</button>`).join('');
+}
+function filter(tag, btn) { currentFilter = tag; renderFilterBar(); renderGrid(); }
+function pickTagClass(tag) {
+  let hash = 0;
+  for (let i=0;i<tag.length;i++) hash = tag.charCodeAt(i) + ((hash<<5)-hash);
+  return tagColorClasses[Math.abs(hash) % tagColorClasses.length];
+}
+
+// ─── ROTATION GRID ───────────────────────────────────────────
+function renderGrid() {
+  const grid = document.getElementById('grid');
+  const empty = document.getElementById('emptyState');
+  const resultsBar = document.getElementById('resultsBar');
+  const headerCount = document.getElementById('headerCount');
+  grid.innerHTML = '';
+  const filtered = currentFilter === 'all' ? meals : meals.filter(m => m.tags.includes(currentFilter));
+
+  headerCount.textContent = `${meals.length} meals`;
+  if (!filtered.length) {
+    empty.style.display = 'block';
+    resultsBar.textContent = 'No results';
+    return;
+  }
+  empty.style.display = 'none';
+  resultsBar.textContent = currentFilter === 'all' ? `All ${filtered.length} meals` : `${filtered.length} meal${filtered.length!==1?'s':''}`;
+
+  filtered.forEach(m => {
+    const tagHTML = m.tags.slice(0,3).map(t => {
+      const lbl = tagLabels[t] || [pickTagClass(t), '🏷 '+t];
+      return `<span class="tag ${lbl[0]}">${lbl[1]}</span>`;
+    }).join('');
+    const inCart = cartMealIds.includes(m.id);
+    const el = document.createElement('div');
+    el.className = 'card' + (inCart ? ' in-cart' : '');
+    el.innerHTML = `
+      <button class="cart-toggle" onclick="event.stopPropagation(); toggleCart(${m.id})" title="Add to this week's cart">${inCart ? '✓' : '+'}</button>
+      <div class="card-header">
+        <div class="card-title">${m.title}</div>
+        <span class="time-pill">⏱ ${m.time}</span>
+      </div>
+      <div class="card-notes">${m.notes}</div>
+      <div class="card-tags">${tagHTML}</div>
+      <button class="recipe-btn" onclick="openModal(${m.id})">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        Recipe & tags
+      </button>
+    `;
+    grid.appendChild(el);
+  });
+}
+
+// ─── CART (shopping-cart style meal selection) ────────────────
+function toggleCart(id) {
+  if (cartMealIds.includes(id)) cartMealIds = cartMealIds.filter(x=>x!==id);
+  else cartMealIds.push(id);
+  saveCart();
+  renderGrid();
+  updateCartBar();
+}
+function updateCartBar() {
+  const bar = document.getElementById('cartBar');
+  const badge = document.getElementById('cartBadge');
+  const count = cartMealIds.length;
+  document.getElementById('cartBarCount').textContent = count;
+  bar.classList.toggle('show', count > 0);
+  if (count > 0) { badge.style.display = 'flex'; badge.textContent = count; }
+  else { badge.style.display = 'none'; }
+}
+
+function openCartReview() {
+  const list = document.getElementById('cartReviewList');
+  if (!cartMealIds.length) {
+    list.innerHTML = '<div class="cart-empty-msg">No meals selected yet. Tap the + on any meal card to add it here.</div>';
+  } else {
+    list.innerHTML = cartMealIds.map(id => {
+      const m = meals.find(x=>x.id===id);
+      if (!m) return '';
+      return `<div class="cart-review-item">
+        <div>
+          <div class="cart-review-name">${m.title}</div>
+          <div style="font-size:11px;color:var(--muted);">${m.time}</div>
+        </div>
+        <button class="cart-review-remove" onclick="removeFromCartReview(${id})">×</button>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('cartReviewOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function removeFromCartReview(id) {
+  cartMealIds = cartMealIds.filter(x=>x!==id);
+  saveCart();
+  openCartReview();
+  renderGrid();
+  updateCartBar();
+}
+function closeCartReview(e) { if (e.target===document.getElementById('cartReviewOverlay')) closeCartReviewDirect(); }
+function closeCartReviewDirect() {
+  document.getElementById('cartReviewOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// CONFIRM: pull ingredients from every cart meal, consolidate duplicates,
+// push into the grocery list's "this week" section, skipping anything
+// already covered by weekly basics.
+function confirmCart() {
+  if (!cartMealIds.length) { showToast('Add some meals to your cart first'); return; }
+  let totalLines = 0;
+  const newItems = [];
+  cartMealIds.forEach(id => {
+    const m = meals.find(x=>x.id===id);
+    if (!m || !m.ingredients) return;
+    const lines = m.ingredients.split(',').map(s=>s.trim()).filter(Boolean);
+    lines.forEach(label => {
+      totalLines++;
+      newItems.push({ label, source: m.title.slice(0,22) });
+    });
+  });
+  const added = addWeekItemsDeduped(newItems);
+  const skipped = totalLines - added;
+  closeCartReviewDirect();
+  switchPage('grocery');
+  showGlTab('thisweek', document.querySelectorAll('.gl-tab')[1]);
+  showToast(`✅ ${added} ingredient${added!==1?'s':''} added to grocery list${skipped>0?` · ${skipped} duplicate${skipped!==1?'s':''} skipped`:''}`);
+}
+
+// ─── RECIPE LINKS ────────────────────────────────────────────
+function buildSearchLinks(title, searchQuery, savedUrl) {
+  const q = encodeURIComponent(searchQuery || title + ' recipe');
+  const q2 = encodeURIComponent(title + ' recipe');
+  const links = [];
+  if (savedUrl) {
+    try { links.push({ icon:'📌', name:'Saved recipe link', url: savedUrl, sub: new URL(savedUrl).hostname.replace('www.','') }); }
+    catch(e) {}
+  }
+  links.push(
+    { icon:'🔍', name:'Google Search', url:`https://www.google.com/search?q=${q}`, sub:'google.com' },
+    { icon:'🎥', name:'YouTube Video', url:`https://www.youtube.com/results?search_query=${q}`, sub:'youtube.com' },
+    { icon:'📖', name:'AllRecipes', url:`https://www.allrecipes.com/search?q=${encodeURIComponent(searchQuery||title)}`, sub:'allrecipes.com' },
+    { icon:'🍳', name:'NYT Cooking', url:`https://cooking.nytimes.com/search?q=${q2}`, sub:'cooking.nytimes.com' }
+  );
+  return links;
+}
+
+// ─── MODAL: VIEW + EDIT TAGS + CART TOGGLE ────────────────────
+function openModal(id) {
+  const m = meals.find(x=>x.id===id);
+  if (!m) return;
+  activeModalMealId = id;
+  document.getElementById('modalTitle').textContent = m.title;
+  document.getElementById('modalTime').textContent = '⏱ ' + m.time;
+  document.getElementById('modalNotes').textContent = m.notes;
+  document.getElementById('modalIngredients').textContent = m.ingredients;
+  document.getElementById('modalTip').innerHTML = `💡 <strong>Tip:</strong> ${m.tip}`;
+  renderModalTags(m);
+  updateModalCartBtn();
+
+  const links = buildSearchLinks(m.title, m.search, m.url);
+  document.getElementById('modalRecipeLinks').innerHTML = links.map(l => `
+    <a class="recipe-link" href="${l.url}" target="_blank" rel="noopener">
+      <div class="recipe-link-icon" style="background:var(--cream)">${l.icon}</div>
+      <div style="flex:1;">
+        <div class="recipe-link-name">${l.name}</div>
+        <div class="recipe-link-url">${l.sub}</div>
+      </div>
+      <span class="recipe-link-arrow">↗</span>
+    </a>
+  `).join('');
+
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function updateModalCartBtn() {
+  const btn = document.getElementById('modalCartBtn');
+  const inCart = cartMealIds.includes(activeModalMealId);
+  btn.textContent = inCart ? '✓ In cart this week — tap to remove' : '+ Add to this week\'s cart';
+  btn.style.background = inCart ? 'var(--green-light)' : 'var(--cream)';
+  btn.style.color = inCart ? 'var(--green)' : 'var(--ink)';
+}
+function toggleCartFromModal() {
+  toggleCart(activeModalMealId);
+  updateModalCartBtn();
+}
+function renderModalTags(m) {
+  const area = document.getElementById('modalTagArea');
+  const allTagKeys = Object.keys(tagLabels);
+  const availableToAdd = allTagKeys.filter(t => !m.tags.includes(t));
+  area.innerHTML = m.tags.map(t => {
+    const lbl = tagLabels[t] || [pickTagClass(t), '🏷 '+t];
+    return `<span class="tag ${lbl[0]} tag-editable">${lbl[1]}<span class="tag-x" onclick="removeTagFromMeal('${t}')">×</span></span>`;
+  }).join('') + (availableToAdd.length ? `
+    <select class="tag-add-select" onchange="addTagToMeal(this.value); this.value='';">
+      <option value="">+ add tag</option>
+      ${availableToAdd.map(t=>`<option value="${t}">${tagLabels[t][1]}</option>`).join('')}
+    </select>` : '');
+}
+function removeTagFromMeal(tag) {
+  const m = meals.find(x=>x.id===activeModalMealId);
+  m.tags = m.tags.filter(t=>t!==tag);
+  saveMeals(); renderModalTags(m); renderGrid(); renderFilterBar();
+}
+function addTagToMeal(tag) {
+  if (!tag) return;
+  const m = meals.find(x=>x.id===activeModalMealId);
+  if (!m.tags.includes(tag)) m.tags.push(tag);
+  saveMeals(); renderModalTags(m); renderGrid();
+}
+function deleteMeal() {
+  if (!confirm('Remove this meal from the rotation?')) return;
+  meals = meals.filter(m=>m.id!==activeModalMealId);
+  cartMealIds = cartMealIds.filter(id=>id!==activeModalMealId);
+  saveMeals(); saveCart();
+  closeModalDirect();
+  renderGrid();
+  updateCartBar();
+  showToast('Meal removed');
+}
+function closeModal(e) { if (e.target===document.getElementById('modalOverlay')) closeModalDirect(); }
+function closeModalDirect() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  activeModalMealId = null;
+}
+
+// ─── ADD MEAL DRAWER ──────────────────────────────────────────
+function openAddDrawer() {
+  document.getElementById('addUrlInput').value = '';
+  document.getElementById('addName').value = '';
+  document.getElementById('addTime').value = '';
+  document.getElementById('addNotes').value = '';
+  document.getElementById('addIngredients').value = '';
+  drawerSelectedTags = [];
+  renderTagPicker();
+  document.getElementById('drawerOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeDrawer(e) {
+  if (e && e.target !== document.getElementById('drawerOverlay')) return;
+  document.getElementById('drawerOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function renderTagPicker() {
+  const picker = document.getElementById('addTagPicker');
+  picker.innerHTML = Object.keys(tagLabels).map(t => `
+    <button type="button" class="tag-option ${drawerSelectedTags.includes(t)?'selected':''}" onclick="toggleDrawerTag('${t}')">${tagLabels[t][1]}</button>
+  `).join('');
+}
+function toggleDrawerTag(t) {
+  if (drawerSelectedTags.includes(t)) drawerSelectedTags = drawerSelectedTags.filter(x=>x!==t);
+  else drawerSelectedTags.push(t);
+  renderTagPicker();
+}
+function addCustomTag() {
+  const input = document.getElementById('customTagInput');
+  const val = input.value.trim().toLowerCase();
+  if (!val) return;
+  const key = val.replace(/\s+/g,'_');
+  if (!tagLabels[key]) { tagLabels[key] = [pickTagClass(key), '🏷 ' + val]; saveTagLabels(); }
+  if (!drawerSelectedTags.includes(key)) drawerSelectedTags.push(key);
+  input.value = '';
+  renderTagPicker();
+  renderFilterBar();
+}
+function cleanIngredientsText(raw) {
+  const lines = raw
+    .split('\n')
+    .map(l => l.trim())
+    .map(l => l.replace(/^[\-\*•●▪]+\s*/, '').replace(/^\d+[\.\)]\s*/, ''))
+    .filter(l => l.length > 1)
+    .filter(l => !/^(ingredients?|directions?|instructions?|method|steps?|notes?|nutrition|prep time|cook time|servings?)\s*:?$/i.test(l))
+    .filter(l => l.length < 120);
+  return lines.join(', ');
+}
+function saveMeal() {
+  const title = document.getElementById('addName').value.trim();
+  if (!title) { showToast('Please add a dish name'); return; }
+  const time = document.getElementById('addTime').value.trim() || '—';
+  const notes = document.getElementById('addNotes').value.trim();
+  const ingredients = cleanIngredientsText(document.getElementById('addIngredients').value.trim()) || document.getElementById('addIngredients').value.trim();
+  const sourceUrl = document.getElementById('addUrlInput').value.trim();
+  const newId = meals.length ? Math.max(...meals.map(m=>m.id)) + 1 : 1;
+
+  meals.push({
+    id: newId, title, time, notes,
+    ingredients: ingredients || 'See saved recipe link',
+    tags: drawerSelectedTags.length ? drawerSelectedTags : ['custom'],
+    tip: 'Added from your recipe collection.',
+    search: title + ' recipe',
+    url: sourceUrl && sourceUrl.startsWith('http') ? sourceUrl : undefined
+  });
+  if (!tagLabels['custom']) tagLabels['custom'] = ['tag-custom','🏷 Custom'];
+  saveMeals(); saveTagLabels();
+  closeDrawer();
+  renderFilterBar();
+  renderGrid();
+  showToast(`"${title}" added to rotation`);
+}
+
+// ═══════════════ GROCERY LIST LOGIC ═══════════════════════════
+function showGlTab(name, btn) {
+  ['basics','thisweek','manage'].forEach(t => {
+    document.getElementById('gl-tab-'+t).style.display = t===name ? '' : 'none';
+  });
+  document.querySelectorAll('.gl-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (name === 'manage') renderManage();
+}
+function getCategories() { return [...new Set(basics.map(i=>i.cat))]; }
+function renderBasics() {
+  const grid = document.getElementById('basicsGrid');
+  const cats = getCategories();
+  grid.innerHTML = cats.map(cat => {
+    const items = basics.filter(i=>i.cat===cat);
+    const remaining = items.filter((_,ii)=> !checkedBasics[cat+'::'+ii]).length;
+    const itemsHTML = items.map((item, ii) => {
+      const key = cat+'::'+ii;
+      const checked = !!checkedBasics[key];
+      return `<div class="item-row ${checked?'checked':''}">
+        <div class="item-check-area" onclick="toggleBasic('${escKey(key)}')">
+          <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+          <div>
+            <div class="item-label">${item.label}</div>
+            ${item.sub ? `<div class="item-sub-label">${item.sub}</div>` : ''}
+          </div>
+        </div>
+        <button class="remove-item-btn" onclick="removeBasicInline('${escKey(cat)}',${ii})">×</button>
+      </div>`;
+    }).join('');
+    const catId = 'sect-'+cat.replace(/[^a-z0-9]/gi,'_');
+    return `<div class="section-card">
+      <div class="section-header">
+        <div class="section-title">${cat}</div>
+        <span class="section-count">${remaining} left</span>
+      </div>
+      <div class="items-list">${itemsHTML}</div>
+      <div class="add-to-section">
+        <div class="add-item-row">
+          <input class="add-item-input" id="${catId}-input" placeholder="Add item..." onkeydown="if(event.key==='Enter')addItemToSection('${escKey(cat)}','${catId}-input')" />
+          <button class="add-item-btn" onclick="addItemToSection('${escKey(cat)}','${catId}-input')">+ Add</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function escKey(s){ return s.replace(/'/g,"\\'"); }
+function toggleBasic(key) { checkedBasics[key] = !checkedBasics[key]; saveCheckedBasics(); renderBasics(); }
+function removeBasicInline(cat, idx) {
+  const actualItems = basics.filter(i=>i.cat===cat);
+  const item = actualItems[idx];
+  const globalIdx = basics.indexOf(item);
+  if (globalIdx > -1) basics.splice(globalIdx, 1);
+  saveBasics(); renderBasics(); renderManage();
+}
+function addItemToSection(cat, inputId) {
+  const input = document.getElementById(inputId);
+  const val = input.value.trim();
+  if (!val) return;
+  basics.push({ cat, label: val });
+  input.value = '';
+  saveBasics(); renderBasics();
+}
+function uncheckAll() { checkedBasics = {}; checkedWeek = {}; saveCheckedBasics(); saveCheckedWeek(); renderBasics(); renderWeekItems(); }
+
+function renderManage() {
+  const grid = document.getElementById('manageGrid');
+  grid.innerHTML = basics.map((item, i) => `
+    <div class="manage-item">
+      <span>${item.label} <span style="font-size:10px;color:var(--muted)">${item.cat.replace(/[^a-zA-Z& ]/g,'').trim()}</span></span>
+      <button class="manage-remove" onclick="removeBasic(${i})">×</button>
+    </div>
+  `).join('');
+  const sel = document.getElementById('manageCatSelect');
+  sel.innerHTML = getCategories().map(c=>`<option value="${c}">${c}</option>`).join('');
+}
+function removeBasic(i) { basics.splice(i, 1); saveBasics(); renderManage(); renderBasics(); }
+function addBasicItem() {
+  const input = document.getElementById('manageItemInput');
+  const sel = document.getElementById('manageCatSelect');
+  const val = input.value.trim();
+  if (!val) return;
+  basics.push({ cat: sel.value, label: val });
+  input.value = '';
+  saveBasics(); renderManage(); renderBasics();
+}
+
+function renderWeekItems() {
+  const el = document.getElementById('weekItemsList');
+  if (!weekItems.length) {
+    el.innerHTML = '<div style="text-align:center;padding:1.5rem;font-size:13px;color:var(--muted);">No ingredients yet — select meals in the Dinner Rotation tab and confirm your cart, or add a one-off item above</div>';
+    return;
+  }
+  el.innerHTML = weekItems.map((item, i) => {
+    const checked = !!checkedWeek[i];
+    return `<div class="item-row ${checked?'checked':''}">
+      <div class="item-check-area" onclick="toggleWeekItem(${i})">
+        <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+        <div class="item-label">${item.label}${item.source ? `<span class="meal-source-tag">${item.source}</span>` : ''}</div>
+      </div>
+      <button class="remove-item-btn" onclick="removeWeekItem(${i})">×</button>
+    </div>`;
+  }).join('');
+}
+function toggleWeekItem(i) { checkedWeek[i] = !checkedWeek[i]; saveCheckedWeek(); renderWeekItems(); }
+function removeWeekItem(i) {
+  weekItems.splice(i, 1);
+  const newChecked = {};
+  Object.keys(checkedWeek).forEach(k => { if (parseInt(k) < i) newChecked[k] = checkedWeek[k]; else if (parseInt(k) > i) newChecked[parseInt(k)-1] = checkedWeek[k]; });
+  checkedWeek = newChecked;
+  saveWeekItems(); saveCheckedWeek(); renderWeekItems();
+}
+function quickAdd() {
+  const input = document.getElementById('quickAddInput');
+  const val = input.value.trim();
+  if (!val) return;
+  addWeekItemsDeduped([{ label: val, source: 'manual' }]);
+  input.value = '';
+  renderWeekItems();
+}
+function clearWeekItems() {
+  if (confirm("Clear all this week's ingredients?")) {
+    weekItems = []; checkedWeek = {};
+    saveWeekItems(); saveCheckedWeek(); renderWeekItems();
+  }
+}
+// ─── QUANTITY-AWARE INGREDIENT PARSING ────────────────────────
+// Parses a line like "2 lbs chicken breast" into {amount, unit, name}.
+// Falls back gracefully (amount=null) for unparseable lines like "salt to taste".
+const UNIT_WORDS = ['lb','lbs','pound','pounds','oz','ounce','ounces','g','gram','grams','kg',
+  'cup','cups','tbsp','tablespoon','tablespoons','tsp','teaspoon','teaspoons',
+  'clove','cloves','can','cans','jar','jars','pkg','package','packages','bunch','bunches',
+  'head','heads','slice','slices','piece','pieces','fillet','fillets','stick','sticks'];
+
+// Unit conversion groups: units within a group convert to a common base unit.
+// Cross-group items (e.g. lb vs cup) never get summed numerically — they're
+// combined as separate lines instead, which is the safe/correct behavior.
+const UNIT_GROUPS = {
+  weight: { base: 'oz', oz:1, ounce:1, ounces:1, lb:16, lbs:16, pound:16, pounds:16, g:0.035274, gram:0.035274, grams:0.035274, kg:35.274 },
+  volume: { base: 'tsp', tsp:1, teaspoon:1, teaspoons:1, tbsp:3, tablespoon:3, tablespoons:3, cup:48, cups:48 },
+  count:  { base: 'ct', clove:1, cloves:1, can:1, cans:1, jar:1, jars:1, pkg:1, package:1, packages:1,
+            bunch:1, bunches:1, head:1, heads:1, slice:1, slices:1, piece:1, pieces:1, fillet:1, fillets:1, stick:1, sticks:1 }
+};
+function unitGroup(unit) {
+  for (const [name, group] of Object.entries(UNIT_GROUPS)) {
+    if (unit in group) return name;
+  }
+  return null;
+}
+
+const FRACTION_MAP = { '½':0.5,'⅓':0.333,'⅔':0.667,'¼':0.25,'¾':0.75,'⅕':0.2,'⅛':0.125,'⅜':0.375,'⅝':0.625,'⅞':0.875 };
+
+function parseAmount(str) {
+  // handles "2", "1.5", "1/2", "1 1/2", "½", "2-3" (takes upper bound)
+  str = str.trim();
+  if (FRACTION_MAP[str] !== undefined) return FRACTION_MAP[str];
+  const mixedMatch = str.match(/^(\d+)\s+(\d+)\/(\d+)$/); // "1 1/2"
+  if (mixedMatch) return parseInt(mixedMatch[1]) + parseInt(mixedMatch[2])/parseInt(mixedMatch[3]);
+  const fracMatch = str.match(/^(\d+)\/(\d+)$/); // "1/2"
+  if (fracMatch) return parseInt(fracMatch[1])/parseInt(fracMatch[2]);
+  const rangeMatch = str.match(/^(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)$/); // "2-3"
+  if (rangeMatch) return parseFloat(rangeMatch[2]);
+  const num = parseFloat(str);
+  return isNaN(num) ? null : num;
+}
+
+function parseIngredientLine(raw) {
+  let s = raw.trim();
+  // strip leading "of" sometimes left over, normalize whitespace
+  s = s.replace(/\s+/g, ' ');
+
+  const unitPattern = UNIT_WORDS.join('|');
+  // Matches: [amount][optional fraction][unit] [rest as name]
+  // e.g. "2 lbs chicken breast", "1 1/2 cups rice", "3 cloves garlic, minced"
+  const re = new RegExp(
+    `^([\\d¼½¾⅓⅔⅕⅛⅜⅝⅞]+(?:\\s+\\d+\\/\\d+)?(?:\\/\\d+)?(?:\\s*-\\s*[\\d.]+)?)\\s*(${unitPattern})\\.?s?\\s+(.+)$`,
+    'i'
+  );
+  const match = s.match(re);
+  if (match) {
+    const amount = parseAmount(match[1]);
+    let unit = match[2].toLowerCase().replace(/\.$/,'');
+    const name = match[3].trim().replace(/,.*$/,''); // drop ", minced" etc. for matching purposes, keep original for display
+    if (amount !== null) {
+      return { amount, unit, name: name.toLowerCase(), displayName: match[3].trim(), raw };
+    }
+  }
+  // No parseable quantity (e.g. "salt and pepper to taste", "3 garlic cloves" w/ noun-first count)
+  // Try noun-first count pattern: "3 garlic cloves" / "2 chicken breasts"
+  const nounFirstRe = /^([\d¼½¾⅓⅔⅕⅛⅜⅝⅞]+(?:\s+\d+\/\d+)?(?:\/\d+)?)\s+(.+)$/;
+  const nf = s.match(nounFirstRe);
+  if (nf) {
+    const amount = parseAmount(nf[1]);
+    if (amount !== null) {
+      return { amount, unit: 'ct', name: nf[2].trim().replace(/,.*$/,'').toLowerCase(), displayName: nf[2].trim(), raw };
+    }
+  }
+  return { amount: null, unit: null, name: s.toLowerCase().replace(/,.*$/,''), displayName: s, raw };
+}
+
+function coreIngredientName(name) {
+  // Strip descriptors so "chicken breast" and "boneless skinless chicken breast" match
+  return name
+    .replace(/\b(boneless|skinless|raw|cooked|shredded|sliced|chopped|diced|minced|peeled|deveined|rinsed|drained|fresh|dried|frozen|large|medium|small|whole|low.sodium|low.fat|fat.free|nonfat|organic|unsweetened|creamy|extra|virgin)\b/gi, '')
+    .replace(/\s+/g, ' ').trim();
+}
+
+function formatAmount(n) {
+  if (Number.isInteger(n)) return String(n);
+  // round to nearest 1/4 for readability, but keep 1 decimal as fallback
+  const rounded = Math.round(n * 4) / 4;
+  const wholePart = Math.floor(rounded);
+  const fracPart = rounded - wholePart;
+  const fracLabels = { 0.25:'¼', 0.5:'½', 0.75:'¾' };
+  if (fracLabels[fracPart]) return (wholePart > 0 ? wholePart + ' ' : '') + fracLabels[fracPart];
+  return String(Math.round(n * 100) / 100);
+}
+
+function formatParsedIngredient(p) {
+  if (p.amount === null) return p.displayName;
+  if (p.unit === 'ct') return `${formatAmount(p.amount)} ${p.displayName}`;
+  const unitLabel = p.amount === 1 ? p.unit.replace(/s$/,'') : (p.unit.endsWith('s') ? p.unit : p.unit + (['lb','oz','cup','tbsp','tsp'].includes(p.unit) ? 's' : ''));
+  return `${formatAmount(p.amount)} ${unitLabel} ${p.displayName}`;
+}
+
+// Combine a new parsed ingredient into existing weekItems, summing quantities
+// when names match and units are compatible. Returns true if merged into an
+// existing line (no new line added), false if it was added as new.
+function mergeIntoWeekItems(parsed, source) {
+  const core = coreIngredientName(parsed.name);
+  const group = parsed.unit ? unitGroup(parsed.unit) : null;
+
+  for (const existing of weekItems) {
+    if (!existing._parsed) continue;
+    const existingCore = coreIngredientName(existing._parsed.name);
+    if (existingCore !== core || !existingCore) continue;
+
+    const existingGroup = existing._parsed.unit ? unitGroup(existing._parsed.unit) : null;
+
+    // Both have parseable, compatible-group quantities -> sum them
+    if (parsed.amount !== null && existing._parsed.amount !== null && group && group === existingGroup) {
+      const newBaseQty = parsed.amount * UNIT_GROUPS[group][parsed.unit];
+      const existingBaseQty = existing._parsed.amount * UNIT_GROUPS[group][existing._parsed.unit];
+      const totalBaseQty = newBaseQty + existingBaseQty;
+
+      // Convert back to the larger of the two original units for a tidier label
+      const preferredUnit = UNIT_GROUPS[group][existing._parsed.unit] >= UNIT_GROUPS[group][parsed.unit]
+        ? existing._parsed.unit : parsed.unit;
+      const totalInPreferredUnit = totalBaseQty / UNIT_GROUPS[group][preferredUnit];
+
+      existing._parsed = { amount: totalInPreferredUnit, unit: preferredUnit, name: parsed.name, displayName: existing._parsed.displayName };
+      existing.label = formatParsedIngredient(existing._parsed);
+
+      // Track every contributing recipe by name, not just a counter
+      if (!existing.sources) existing.sources = [existing.source];
+      if (!existing.sources.includes(source)) existing.sources.push(source);
+      existing.source = existing.sources.length > 1
+        ? `${existing.sources[0]} +${existing.sources.length - 1} more`
+        : existing.sources[0];
+      return true;
+    }
+
+    // Same core ingredient but unparseable or incompatible units -> don't
+    // silently merge quantities (would be wrong), but avoid an exact dupe
+    if (existing._parsed.raw && existing._parsed.raw.toLowerCase() === parsed.raw.toLowerCase()) {
+      return true; // genuine exact duplicate, skip
+    }
+  }
+  return false; // no match found, caller should add as new
+}
+
+function addWeekItemsDeduped(newItems) {
+  const basicCores = new Set(basics.map(i => coreIngredientName(normalizeIngredient(i.label))));
+  let added = 0;
+  newItems.forEach(item => {
+    const parsed = parseIngredientLine(item.label);
+    const core = coreIngredientName(parsed.name);
+
+    // skip anything already covered by weekly basics
+    if (basicCores.has(core) || [...basicCores].some(b => b && (core.includes(b) || b.includes(core)) && core.length > 2)) return;
+
+    const merged = mergeIntoWeekItems(parsed, item.source);
+    if (!merged) {
+      weekItems.push({ label: formatParsedIngredient(parsed), source: item.source, _parsed: parsed });
+      added++;
+    }
+  });
+  saveWeekItems(); renderWeekItems();
+  return added;
+}
+function normalizeIngredient(s) {
+  return s.toLowerCase()
+    .replace(/\d+(\.\d+)?\s*(lb|lbs|oz|g|kg|cup|cups|tbsp|tsp|clove|cloves|can|cans|jar|jars|pkg|package|bunch|head|large|medium|small|fresh|dried|frozen|whole|skinless|boneless|raw|cooked|shredded|sliced|chopped|diced|minced|peeled|deveined|rinsed|drained|low.sodium|low.fat|fat.free|nonfat|organic|unsweetened|creamy)s?\b/gi,'')
+    .replace(/[^a-z ]/g,'').replace(/\s+/g,' ').trim();
+}
+
+// ─── INIT ──────────────────────────────────────────────────
+const today = new Date();
+const monday = new Date(today);
+monday.setDate(today.getDate() - today.getDay() + 1);
+document.getElementById('weekOf').placeholder = monday.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+
+renderFilterBar();
+renderGrid();
+updateCartBar();
+renderBasics();
+renderWeekItems();
+renderManage();
+</script>
+</body>
+</html>
