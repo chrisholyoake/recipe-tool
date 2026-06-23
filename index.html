@@ -211,7 +211,7 @@
   <div class="header-inner">
     <div>
       <div class="logo-title">🍽 Holyoake Kitchen</div>
-      <div class="logo-sub" id="headerCount">38 meals</div>
+      <div class="logo-sub" id="headerCount">37 meals</div>
     </div>
     <div class="header-right">
       <button class="icon-btn secondary" onclick="openCartReview()">
@@ -259,7 +259,8 @@
     <div class="gl-week-bar">
       <label>Week of</label>
       <input type="text" id="weekOf" placeholder="" />
-      <button class="icon-btn secondary" style="font-size:12px;padding:6px 12px;" onclick="uncheckAll()">↺ Reset checks</button>
+      <button class="icon-btn secondary" style="font-size:12px;padding:6px 12px;" onclick="uncheckAll()">↺ Uncheck items</button>
+      <button class="icon-btn secondary" style="font-size:12px;padding:6px 12px;" onclick="startNewWeek()">🗓 Start new week</button>
       <button class="icon-btn" style="font-size:12px;padding:6px 12px;" onclick="window.print()">🖨 Print</button>
     </div>
 
@@ -413,44 +414,43 @@
 <script>
 
 const DEFAULT_MEALS = [
-  { id:1, title:"Greek Chicken Bowls", time:"25 min", tags:["chicken","bowl","med","you"], notes:"Marinated chicken breast, farro or rice, cucumber-tomato salad, store-bought tzatziki.", ingredients:"Chicken breast, farro, cucumber, cherry tomatoes, red onion, tzatziki, lemon", tip:"Can be marinated the morning of for an easier dinner.", search:"greek chicken bowl recipe" },
-  { id:2, title:"Chimichurri Chicken + Roasted Veggies", time:"30 min", tags:["chicken","bowl","you"], notes:"Sheet pan chicken breast with blender chimichurri, roasted vegetables.", ingredients:"Chicken breast, parsley, garlic, red wine vinegar, olive oil, any roasting veg", tip:"Make a big batch of chimichurri ahead — it lasts all week.", search:"chimichurri chicken sheet pan recipe" },
-  { id:3, title:"Chicken Tacos", time:"20 min", tags:["chicken","mexican","you"], notes:"Shredded chicken breast, tortillas, quick slaw, avocado, lime crema.", ingredients:"Chicken breast, tortillas, cabbage, avocado, sour cream, lime, cumin, smoked paprika", tip:"Shred chicken ahead so dinner is just assembly at the table.", search:"shredded chicken tacos recipe" },
-  { id:4, title:"Burmese Coconut Curry", time:"35 min", tags:["chicken","bowl","asian"], notes:"Chicken thighs in coconut milk curry with crispy shallots and lime over rice.", ingredients:"Chicken thighs, coconut milk, fish sauce, turmeric, ginger, garlic, rice, shallots", tip:"Mostly hands-off simmering. Tastes even better the next day.", search:"Burmese coconut chicken curry recipe" },
-  { id:5, title:"Sheet Pan Fajitas", time:"25 min", tags:["chicken","mexican","you"], notes:"Sliced chicken breast, peppers, onions on one pan. Tortillas and toppings on the side.", ingredients:"Chicken breast, bell peppers, onion, cumin, smoked paprika, tortillas, avocado, lime", tip:"Overlaps entirely with taco night ingredients.", search:"sheet pan chicken fajitas recipe" },
-  { id:6, title:"Black Bean Burrito Bowls", time:"20 min", tags:["mexican","bowl","you"], notes:"Spiced black beans, rice, avocado, salsa, cheese — vegetarian and the fastest on the list.", ingredients:"Canned black beans, rice, avocado, salsa, cumin, smoked paprika, lime, cheese", tip:"All pantry and fridge — nothing to defrost.", search:"black bean burrito bowl recipe" },
-  { id:7, title:"Salsa Verde Chicken (Stovetop)", time:"25 min", tags:["chicken","mexican"], notes:"Chicken breast braised in jarred salsa verde, served with rice and beans or tortillas.", ingredients:"Chicken breast, jarred salsa verde, chicken broth, cumin, rice or tortillas", tip:"Almost zero prep — the salsa verde does everything.", search:"salsa verde chicken stovetop recipe" },
-  { id:8, title:"Tilapia with Mango-Avocado Salsa", time:"20 min", tags:["fish","mexican","you"], notes:"Pan-seared white fish topped with bright mango salsa.", ingredients:"Tilapia or cod, mango, avocado, lime, cilantro, jalapeño", tip:"Mildest possible fish — genuinely not fishy.", search:"tilapia mango avocado salsa recipe" },
-  { id:9, title:"Fish Tacos with Chipotle Crema", time:"25 min", tags:["fish","mexican","you"], notes:"Baked white fish, slaw, chipotle crema, tortillas.", ingredients:"Tilapia or cod, tortillas, cabbage, chipotle in adobo, sour cream, lime, cilantro", tip:"Chipotle crema transforms bland white fish.", search:"baked fish tacos chipotle crema recipe" },
-  { id:10, title:"Lemon Herb Baked Salmon", time:"20 min", tags:["fish","bowl","med"], notes:"Sheet pan salmon with lemon, garlic, herbs over farro with a simple salad.", ingredients:"Salmon, lemon, garlic, olive oil, parsley or dill, farro or rice", tip:"Oven does the work — minimal hands-on time.", search:"lemon herb baked salmon recipe" },
-  { id:11, title:"Chicken Shawarma Bowls", time:"30 min", tags:["chicken","bowl","med"], notes:"Shawarma-spiced chicken breast, rice, hummus, cucumber, tomato, pickled onion.", ingredients:"Chicken breast, cumin, paprika, turmeric, cinnamon, garlic, hummus, cucumber, rice", tip:"Spice blend overlaps with Greek bowls.", search:"chicken shawarma bowl recipe" },
-  { id:12, title:"Chicken Fried Rice", time:"20 min", tags:["chicken","bowl","asian","you"], notes:"Leftover rice, chicken, eggs, soy sauce, sesame oil, frozen veg.", ingredients:"Leftover rice, chicken, eggs, soy sauce, sesame oil, frozen veg, garlic", tip:"Kid-friendly, zero grocery trip needed.", search:"easy chicken fried rice recipe" },
-  { id:13, title:"Chicken Tortilla Soup", time:"35 min", tags:["chicken","mexican"], notes:"Shredded chicken, canned tomatoes, black beans, corn, broth, tortilla chips.", ingredients:"Chicken breast, canned tomatoes, black beans, corn, chicken broth, cumin, smoked paprika, lime", tip:"Mostly pantry/shelf-stable. Makes a big batch.", search:"chicken tortilla soup recipe easy" },
-  { id:14, title:"Grain Bowls with Crispy Chickpeas", time:"25 min", tags:["bowl","med","you"], notes:"Farro base, roasted spiced chickpeas, any veg, tahini or lemon dressing.", ingredients:"Canned chickpeas, farro or rice, any roasting veg, olive oil, cumin, tahini or lemon", tip:"Best vegetarian backup night.", search:"crispy chickpea grain bowl recipe" },
-  { id:15, title:"Pesto Chicken Pasta", time:"20 min", tags:["chicken","you"], notes:"Pasta, store-bought pesto, rotisserie chicken, cherry tomatoes, parmesan.", ingredients:"Pasta, store-bought pesto, chicken, cherry tomatoes, parmesan", tip:"Keep pesto and a rotisserie chicken on hand for a 15-min dinner.", search:"pesto chicken pasta easy recipe" },
-  { id:16, title:"Lemon Chicken with Orzo + Olives", time:"30 min", tags:["chicken","med"], notes:"Browned chicken breast, orzo cooked in chicken broth, kalamata olives, lemon, herbs.", ingredients:"Chicken breast, orzo, chicken broth, kalamata olives, lemon, garlic, parsley, feta", tip:"One pan — orzo absorbs all the pan flavor.", search:"one pan lemon chicken orzo olives recipe" },
-  { id:17, title:"Spanakopita-Style Chicken", time:"30 min", tags:["chicken","med","you"], notes:"Chicken breast topped with spinach, feta, and herbs — sheet pan.", ingredients:"Chicken breast, frozen spinach, feta, garlic, lemon, olive oil, dried oregano", tip:"Frozen spinach makes this pantry-friendly.", search:"spinach feta stuffed chicken breast recipe" },
-  { id:18, title:"Lamb or Beef Kofta Bowls", time:"30 min", tags:["med","bowl"], notes:"Spiced ground meat patties, rice or farro, tzatziki, cucumber-tomato salad, pita.", ingredients:"Ground lamb or beef, cumin, coriander, garlic, parsley, farro or rice, tzatziki, pita", tip:"Spices overlap almost entirely with shawarma blend.", search:"lamb kofta bowls recipe" },
-  { id:19, title:"White Bean + Tomato Stew", time:"25 min", tags:["med","bowl","you"], notes:"Cannellini beans simmered with canned tomatoes, garlic, olive oil, fresh herbs.", ingredients:"Canned cannellini beans, canned tomatoes, garlic, olive oil, rosemary or thyme, parmesan, pita", tip:"Completely pantry-based, vegetarian, and filling.", search:"white bean tomato stew recipe" },
-  { id:20, title:"Soy-Glazed Chicken Breast + Rice", time:"25 min", tags:["chicken","asian","bowl","you"], notes:"Chicken breast in a soy-honey-garlic glaze, over rice with cucumber.", ingredients:"Chicken breast, soy sauce, honey, garlic, ginger, rice, cucumber, sesame oil", tip:"3-ingredient glaze. Add a fried egg on top for kids.", search:"soy glazed chicken breast rice bowl recipe" },
-  { id:21, title:"Ginger Scallion Noodles", time:"20 min", tags:["asian","you"], notes:"Noodles tossed in ginger-scallion-soy sauce, topped with soft-boiled egg and veg.", ingredients:"Lo mein or spaghetti noodles, scallions, ginger, soy sauce, sesame oil, egg, any veg", tip:"Scallion sauce takes 5 minutes.", search:"ginger scallion noodles recipe" },
-  { id:22, title:"Thai Peanut Chicken Bowls", time:"25 min", tags:["chicken","asian","bowl","you"], notes:"Sliced chicken breast, rice or noodles, shredded cabbage and carrots, peanut sauce.", ingredients:"Chicken breast, rice or noodles, cabbage, carrots, scallions, peanut butter, soy sauce, lime, garlic", tip:"Peanut sauce takes 3 minutes. Kid-friendly.", search:"thai peanut chicken bowl recipe" },
-  { id:23, title:"Miso Butter Salmon", time:"20 min", tags:["fish","asian"], notes:"Salmon glazed with miso-butter-soy, roasted at high heat, over rice with broccoli.", ingredients:"Salmon, white miso paste, butter, soy sauce, honey, rice, broccoli", tip:"Most flavor-per-minute meal on the list.", search:"miso butter salmon recipe" },
-  { id:24, title:"Classic Smash Burgers", time:"20 min", tags:["burger","you"], notes:"Smash patties, American cheese, brioche bun, special sauce.", ingredients:"80/20 ground beef, brioche buns, American cheese, lettuce, tomato, onion, mayo, mustard, ketchup", tip:"Needs a very hot cast iron or griddle.", search:"smash burger recipe homemade" },
-  { id:25, title:"Greek Lamb Burgers", time:"25 min", tags:["burger","med","you"], notes:"Ground lamb patties with feta and herbs, tzatziki, tomato, red onion.", ingredients:"Ground lamb, feta, garlic, dried oregano, tzatziki, pita or brioche, tomato, red onion", tip:"Feta mixed into the patty keeps them juicy.", search:"greek lamb burger recipe feta" },
-  { id:26, title:"Salsa Verde Chicken (Crockpot)", time:"10 min prep", tags:["chicken","mexican","crockpot"], notes:"Chicken breast, Herdez salsa verde, cream cheese, cumin. Dump and go.", ingredients:"2 lbs chicken breast, salsa verde, cream cheese, garlic, cumin, salt & pepper", tip:"Cream cheese makes it rich without being heavy.", search:"crockpot salsa verde chicken recipe" },
-  { id:27, title:"Chicken Enchilada Bowls (Crockpot)", time:"10 min prep", tags:["chicken","mexican","bowl","crockpot"], notes:"Chicken breast, enchilada sauce, bell peppers, green chiles, taco seasoning.", ingredients:"2 lbs chicken breast, enchilada sauce, bell peppers, green chiles, taco seasoning, onion", tip:"Totally hands-off. Serve over jasmine rice.", search:"crockpot chicken enchilada bowls recipe" },
-  { id:28, title:"White Chicken Chili", time:"35 min", tags:["chicken","mexican"], notes:"Shredded chicken, white beans, green chiles, cream cheese, Greek yogurt.", ingredients:"Shredded chicken, white beans, green chiles, chicken broth, cream cheese, Greek yogurt, cumin, chili powder, lime", tip:"Use rotisserie chicken to make this faster.", search:"white chicken chili recipe easy" },
-  { id:29, title:"Thai Peanut Crockpot Chicken", time:"10 min prep", tags:["chicken","asian","bowl","crockpot"], notes:"Chicken breast slow-cooked in peanut butter, coconut milk, soy sauce, honey, sriracha.", ingredients:"3 lbs chicken breast, peanut butter, coconut milk, soy sauce, honey, rice vinegar, sriracha, garlic, ginger, lime", tip:"One of the highest-protein options.", search:"crockpot thai peanut chicken recipe" },
-  { id:30, title:"Sesame Chicken (Crockpot)", time:"10 min prep", tags:["chicken","asian","bowl","crockpot"], notes:"Chicken breast in soy-honey-sesame-ginger glaze with bell peppers and snap peas.", ingredients:"2 lbs chicken breast, soy sauce, honey, sesame oil, garlic, ginger, rice vinegar, bell peppers, snap peas", tip:"Add veggies in the last 30-45 min so they stay crisp.", search:"crockpot sesame chicken recipe" },
-  { id:31, title:"BBQ Pulled Chicken (Crockpot)", time:"5 min prep", tags:["chicken","bowl","crockpot","you"], notes:"Chicken breast, low-sugar BBQ sauce, apple cider vinegar.", ingredients:"2 lbs chicken breast, low-sugar BBQ sauce, apple cider vinegar, garlic powder", tip:"Easiest crockpot meal on the list.", search:"crockpot BBQ pulled chicken recipe" },
-  { id:32, title:"Buffalo Chicken (Crockpot)", time:"5 min prep", tags:["chicken","bowl","crockpot","you"], notes:"Chicken breast, Frank's RedHot, broth, garlic powder.", ingredients:"2 lbs chicken breast, Frank's RedHot, chicken broth, garlic powder, onion powder", tip:"Serve over rice with ranch drizzle.", search:"crockpot buffalo chicken recipe" },
-  { id:33, title:"Teriyaki Chicken Bowl (Crockpot)", time:"10 min prep", tags:["chicken","asian","bowl","crockpot"], notes:"Chicken thighs in homemade teriyaki, shredded over jasmine rice with yum-yum sauce.", ingredients:"3 lbs chicken thighs, liquid aminos, soy sauce, mirin, honey, cornstarch, jasmine rice, mayo, Greek yogurt, sriracha", tip:"Yum-yum sauce is what makes it. Kid-friendly.", search:"crockpot teriyaki chicken bowl recipe" },
-  { id:34, title:"Teriyaki Meatballs (Crockpot)", time:"15 min prep", tags:["bowl","asian","crockpot"], notes:"Lean ground beef meatballs in homemade teriyaki sauce, over rice.", ingredients:"2 lbs lean ground beef, egg, breadcrumbs, garlic powder, liquid aminos, soy sauce, mirin, honey", tip:"Great change of pace from chicken.", search:"crockpot teriyaki meatballs recipe" },
-  { id:35, title:"Protein Chicken Pasta (Crockpot)", time:"10 min prep", tags:["chicken","crockpot"], notes:"Chicken slow-cooked in tomato-basil sauce, mixed with protein pasta and cottage cheese sauce.", ingredients:"Chicken, kale, cottage cheese, tomato-basil sauce, protein pasta, cayenne, garlic salt, onion powder", tip:"Tastes like a cream sauce — high protein.", search:"high protein chicken pasta crockpot recipe" },
-  { id:36, title:"Chicken Alfredo (Crockpot)", time:"10 min prep", tags:["chicken","crockpot"], notes:"Chicken breast in lemon-parmesan broth, mixed with protein pasta and Alfredo sauce.", ingredients:"Chicken breast, parmesan, lemon, butter, garlic powder, protein pasta, cottage cheese, cream cheese, milk", tip:"Surprisingly creamy. Good on a heavier activity day.", search:"healthy chicken alfredo crockpot recipe" },
-  { id:37, title:"Sheet Pan Salmon + Veggies", time:"30 min", tags:["fish","you"], notes:"Salmon fillets with broccoli, zucchini, bell pepper at 400°F.", ingredients:"Salmon fillets, broccoli, zucchini, bell pepper, olive oil, garlic powder, paprika, lemon", tip:"One of the simplest fish dinners — oven does everything.", search:"sheet pan salmon vegetables recipe" },
-  { id:38, title:"Turkey Meatballs + Potatoes", time:"30 min", tags:["you"], notes:"Ground turkey meatballs, baby potatoes, green beans on one sheet pan.", ingredients:"Ground turkey, egg, panko breadcrumbs, garlic powder, Italian seasoning, baby potatoes, green beans, olive oil", tip:"Add green beans in the last 15 min so they don't overcook.", search:"turkey meatballs sheet pan potatoes green beans" }
+  { id:1, title:"Greek Chicken Bowls", time:"25 min", tags:["chicken","bowl","med","you"], notes:"Marinated chicken breast, farro or rice, cucumber-tomato salad, store-bought tzatziki.", ingredients:"Chicken breast, farro, cucumber, cherry tomatoes, red onion, tzatziki, lemon", tip:"Can be marinated the morning of for an easier dinner.", search:"greek chicken bowl recipe", url:"https://www.twopeasandtheirpod.com/greek-chicken-bowls/" },
+  { id:2, title:"Chimichurri Chicken + Roasted Veggies", time:"30 min", tags:["chicken","bowl","you"], notes:"Sheet pan chicken breast with blender chimichurri, roasted vegetables.", ingredients:"Chicken breast, parsley, garlic, red wine vinegar, olive oil, any roasting veg", tip:"Make a big batch of chimichurri ahead — it lasts all week.", search:"chimichurri chicken sheet pan recipe", url:"https://thefoodiephysician.com/sheet-pan-roast-chicken-and-potatoes-with-chimichurri/" },
+  { id:3, title:"Chicken Tacos", time:"20 min", tags:["chicken","mexican","you"], notes:"Shredded chicken breast, tortillas, quick slaw, avocado, lime crema.", ingredients:"Chicken breast, tortillas, cabbage, avocado, sour cream, lime, cumin, smoked paprika", tip:"Shred chicken ahead so dinner is just assembly at the table.", search:"shredded chicken tacos recipe", url:"https://www.ourhappymess.com/easy-chicken-taco-recipe/" },
+  { id:4, title:"Burmese Coconut Curry", time:"35 min", tags:["chicken","bowl","asian"], notes:"Chicken thighs in coconut milk curry with crispy shallots and lime over rice.", ingredients:"Chicken thighs, coconut milk, fish sauce, turmeric, ginger, garlic, rice, shallots", tip:"Mostly hands-off simmering. Tastes even better the next day.", search:"Burmese coconut chicken curry recipe", url:"https://cooking.nytimes.com/recipes/1021760-coconut-chicken-curry" },
+  { id:5, title:"Sheet Pan Fajitas", time:"25 min", tags:["chicken","mexican","you"], notes:"Sliced chicken breast, peppers, onions on one pan. Tortillas and toppings on the side.", ingredients:"Chicken breast, bell peppers, onion, cumin, smoked paprika, tortillas, avocado, lime", tip:"Overlaps entirely with taco night ingredients.", search:"sheet pan chicken fajitas recipe", url:"https://www.budgetbytes.com/oven-fajitas/" },
+  { id:6, title:"Black Bean Burrito Bowls", time:"20 min", tags:["mexican","bowl","you"], notes:"Spiced black beans, rice, avocado, salsa, cheese — vegetarian and the fastest on the list.", ingredients:"Canned black beans, rice, avocado, salsa, cumin, smoked paprika, lime, cheese", tip:"All pantry and fridge — nothing to defrost.", search:"black bean burrito bowl recipe", url:"https://cookieandkate.com/kale-black-bean-and-avocado-burrito-bowl/" },
+  { id:7, title:"Salsa Verde Chicken (Stovetop)", time:"25 min", tags:["chicken","mexican"], notes:"Chicken breast braised in jarred salsa verde, served with rice and beans or tortillas.", ingredients:"Chicken breast, jarred salsa verde, chicken broth, cumin, rice or tortillas", tip:"Almost zero prep — the salsa verde does everything.", search:"salsa verde chicken stovetop recipe", url:"https://thewholecook.com/salsa-verde-skillet-chicken/" },
+  { id:8, title:"Tilapia with Mango-Avocado Salsa", time:"20 min", tags:["fish","mexican","you"], notes:"Pan-seared white fish topped with bright mango salsa.", ingredients:"Tilapia or cod, mango, avocado, lime, cilantro, jalapeño", tip:"Mildest possible fish — genuinely not fishy.", search:"tilapia mango avocado salsa recipe", url:"https://www.thefoodieaffair.com/tilapia-with-avocado-mango-salsa/" },
+  { id:9, title:"Fish Tacos with Chipotle Crema", time:"25 min", tags:["fish","mexican","you"], notes:"Baked white fish, slaw, chipotle crema, tortillas.", ingredients:"Tilapia or cod, tortillas, cabbage, chipotle in adobo, sour cream, lime, cilantro", tip:"Chipotle crema transforms bland white fish.", search:"baked fish tacos chipotle crema recipe", url:"https://www.isabeleats.com/fish-tacos-chipotle-lime-crema/" },
+  { id:10, title:"Lemon Herb Baked Salmon", time:"20 min", tags:["fish","bowl","med"], notes:"Sheet pan salmon with lemon, garlic, herbs over farro with a simple salad.", ingredients:"Salmon, lemon, garlic, olive oil, parsley or dill, farro or rice", tip:"Oven does the work — minimal hands-on time.", search:"lemon herb baked salmon recipe", url:"https://www.themediterraneandish.com/lemon-garlic-salmon-recipe/" },
+  { id:11, title:"Chicken Shawarma Bowls", time:"30 min", tags:["chicken","bowl","med"], notes:"Shawarma-spiced chicken breast, rice, hummus, cucumber, tomato, pickled onion.", ingredients:"Chicken breast, cumin, paprika, turmeric, cinnamon, garlic, hummus, cucumber, rice", tip:"Spice blend overlaps with Greek bowls.", search:"chicken shawarma bowl recipe", url:"https://tastesbetterfromscratch.com/chicken-shawarma-bowls/" },
+  { id:12, title:"Chicken Fried Rice", time:"20 min", tags:["chicken","bowl","asian","you"], notes:"Leftover rice, chicken, eggs, soy sauce, sesame oil, frozen veg.", ingredients:"Leftover rice, chicken, eggs, soy sauce, sesame oil, frozen veg, garlic", tip:"Kid-friendly, zero grocery trip needed.", search:"easy chicken fried rice recipe", url:"https://www.averiecooks.com/easy-better-takeout-chicken-fried-rice/" },
+  { id:13, title:"Chicken Tortilla Soup", time:"35 min", tags:["chicken","mexican"], notes:"Shredded chicken, canned tomatoes, black beans, corn, broth, tortilla chips.", ingredients:"Chicken breast, canned tomatoes, black beans, corn, chicken broth, cumin, smoked paprika, lime", tip:"Mostly pantry/shelf-stable. Makes a big batch.", search:"chicken tortilla soup recipe easy", url:"https://www.spendwithpennies.com/chicken-tortilla-soup/" },
+  { id:14, title:"Grain Bowls with Crispy Chickpeas", time:"25 min", tags:["bowl","med","you"], notes:"Farro base, roasted spiced chickpeas, any veg, tahini or lemon dressing.", ingredients:"Canned chickpeas, farro or rice, any roasting veg, olive oil, cumin, tahini or lemon", tip:"Best vegetarian backup night.", search:"crispy chickpea grain bowl recipe", url:"https://www.budgetbytes.com/mediterranean-farro-salad-with-spiced-chickpeas/" },
+  { id:15, title:"Pesto Chicken Pasta", time:"20 min", tags:["chicken","you"], notes:"Pasta, store-bought pesto, rotisserie chicken, cherry tomatoes, parmesan.", ingredients:"Pasta, store-bought pesto, chicken, cherry tomatoes, parmesan", tip:"Keep pesto and a rotisserie chicken on hand for a 15-min dinner.", search:"pesto chicken pasta easy recipe", url:"https://www.dinneratthezoo.com/chicken-pesto-pasta/" },
+  { id:16, title:"Lemon Chicken with Orzo + Olives", time:"30 min", tags:["chicken","med"], notes:"Browned chicken breast, orzo cooked in chicken broth, kalamata olives, lemon, herbs.", ingredients:"Chicken breast, orzo, chicken broth, kalamata olives, lemon, garlic, parsley, feta", tip:"One pan — orzo absorbs all the pan flavor.", search:"one pan lemon chicken orzo olives recipe", url:"https://www.budgetbytes.com/skillet-chicken-with-orzo-and-olives/" },
+  { id:17, title:"Spanakopita-Style Chicken", time:"30 min", tags:["chicken","med","you"], notes:"Chicken breast topped with spinach, feta, and herbs — sheet pan.", ingredients:"Chicken breast, frozen spinach, feta, garlic, lemon, olive oil, dried oregano", tip:"Frozen spinach makes this pantry-friendly.", search:"spinach feta stuffed chicken breast recipe", url:"https://feelgoodfoodie.net/recipe/spinach-feta-stuffed-chicken/" },
+  { id:18, title:"Lamb or Beef Kofta Bowls", time:"30 min", tags:["med","bowl"], notes:"Spiced ground meat patties, rice or farro, tzatziki, cucumber-tomato salad, pita.", ingredients:"Ground lamb or beef, cumin, coriander, garlic, parsley, farro or rice, tzatziki, pita", tip:"Spices overlap almost entirely with shawarma blend.", search:"lamb kofta bowls recipe", url:"https://www.slenderkitchen.com/recipe/kofta-ground-beef-bowl-with-garlic-tzatziki" },
+  { id:19, title:"White Bean + Tomato Stew", time:"25 min", tags:["med","bowl","you"], notes:"Cannellini beans simmered with canned tomatoes, garlic, olive oil, fresh herbs.", ingredients:"Canned cannellini beans, canned tomatoes, garlic, olive oil, rosemary or thyme, parmesan, pita", tip:"Completely pantry-based, vegetarian, and filling.", search:"white bean tomato stew recipe", url:"https://www.themediterraneandish.com/white-bean-stew-recipe/" },
+  { id:20, title:"Soy-Glazed Chicken Breast + Rice", time:"25 min", tags:["chicken","asian","bowl","you"], notes:"Chicken breast in a soy-honey-garlic glaze, over rice with cucumber.", ingredients:"Chicken breast, soy sauce, honey, garlic, ginger, rice, cucumber, sesame oil", tip:"3-ingredient glaze. Add a fried egg on top for kids.", search:"soy glazed chicken breast rice bowl recipe", url:"https://natashaskitchen.com/honey-glazed-chicken/" },
+  { id:21, title:"Ginger Scallion Noodles", time:"20 min", tags:["asian","you"], notes:"Noodles tossed in ginger-scallion-soy sauce, topped with soft-boiled egg and veg.", ingredients:"Lo mein or spaghetti noodles, scallions, ginger, soy sauce, sesame oil, egg, any veg", tip:"Scallion sauce takes 5 minutes.", search:"ginger scallion noodles recipe", url:"https://thefoodietakesflight.com/ginger-and-scallion-noodles/" },
+  { id:22, title:"Thai Peanut Chicken Bowls", time:"25 min", tags:["chicken","asian","bowl","you"], notes:"Sliced chicken breast, rice or noodles, shredded cabbage and carrots, peanut sauce.", ingredients:"Chicken breast, rice or noodles, cabbage, carrots, scallions, peanut butter, soy sauce, lime, garlic", tip:"Peanut sauce takes 3 minutes. Kid-friendly.", search:"thai peanut chicken bowl recipe", url:"https://pinchofyum.com/thai-peanut-chicken-bowls" },
+  { id:23, title:"Miso Butter Salmon", time:"20 min", tags:["fish","asian"], notes:"Salmon glazed with miso-butter-soy, roasted at high heat, over rice with broccoli.", ingredients:"Salmon, white miso paste, butter, soy sauce, honey, rice, broccoli", tip:"Most flavor-per-minute meal on the list.", search:"miso butter salmon recipe", url:"https://www.justonecookbook.com/miso-butter-salmon/" },
+  { id:24, title:"Classic Smash Burgers", time:"20 min", tags:["burger","you"], notes:"Smash patties, American cheese, brioche bun, special sauce.", ingredients:"80/20 ground beef, brioche buns, American cheese, lettuce, tomato, onion, mayo, mustard, ketchup", tip:"Needs a very hot cast iron or griddle.", search:"smash burger recipe homemade", url:"https://natashaskitchen.com/smash-burger-recipe/" },
+  { id:25, title:"Greek Lamb Burgers", time:"25 min", tags:["burger","med","you"], notes:"Ground lamb patties with feta and herbs, tzatziki, tomato, red onion.", ingredients:"Ground lamb, feta, garlic, dried oregano, tzatziki, pita or brioche, tomato, red onion", tip:"Feta mixed into the patty keeps them juicy.", search:"greek lamb burger recipe feta", url:"https://www.jocooks.com/recipes/greek-lamb-burgers/" },
+  { id:26, title:"Salsa Verde Chicken (Crockpot)", time:"10 min prep", tags:["chicken","mexican","crockpot"], notes:"Chicken breast, Herdez salsa verde, cream cheese, cumin. Dump and go.", ingredients:"2 lbs chicken breast, salsa verde, cream cheese, garlic, cumin, salt & pepper", tip:"Cream cheese makes it rich without being heavy.", search:"crockpot salsa verde chicken recipe", url:"https://downshiftology.com/recipes/crockpot-salsa-verde-chicken/" },
+  { id:27, title:"Chicken Enchilada Bowls (Crockpot)", time:"10 min prep", tags:["chicken","mexican","bowl","crockpot"], notes:"Chicken breast, enchilada sauce, bell peppers, green chiles, taco seasoning.", ingredients:"2 lbs chicken breast, enchilada sauce, bell peppers, green chiles, taco seasoning, onion", tip:"Totally hands-off. Serve over jasmine rice.", search:"crockpot chicken enchilada bowls recipe", url:"https://naptimekitchen.com/creamy-chicken-enchilada-bowls/" },
+  { id:28, title:"White Chicken Chili", time:"35 min", tags:["chicken","mexican"], notes:"Shredded chicken, white beans, green chiles, cream cheese, Greek yogurt.", ingredients:"Shredded chicken, white beans, green chiles, chicken broth, cream cheese, Greek yogurt, cumin, chili powder, lime", tip:"Use rotisserie chicken to make this faster.", search:"white chicken chili recipe easy", url:"https://www.halfbakedharvest.com/creamy-white-chicken-chili/" },
+  { id:29, title:"Thai Peanut Crockpot Chicken", time:"10 min prep", tags:["chicken","asian","bowl","crockpot"], notes:"Chicken breast slow-cooked in peanut butter, coconut milk, soy sauce, honey, sriracha.", ingredients:"3 lbs chicken breast, peanut butter, coconut milk, soy sauce, honey, rice vinegar, sriracha, garlic, ginger, lime", tip:"One of the highest-protein options.", search:"crockpot thai peanut chicken recipe", url:"https://www.wellplated.com/slow-cooker-thai-chicken/" },
+  { id:30, title:"Sesame Chicken (Crockpot)", time:"10 min prep", tags:["chicken","asian","bowl","crockpot"], notes:"Chicken breast in soy-honey-sesame-ginger glaze with bell peppers and snap peas.", ingredients:"2 lbs chicken breast, soy sauce, honey, sesame oil, garlic, ginger, rice vinegar, bell peppers, snap peas", tip:"Add veggies in the last 30-45 min so they stay crisp.", search:"crockpot sesame chicken recipe", url:"https://www.suburbansimplicity.com/crock-pot-sesame-chicken/" },
+  { id:31, title:"BBQ Pulled Chicken (Crockpot)", time:"5 min prep", tags:["chicken","bowl","crockpot","you"], notes:"Chicken breast, low-sugar BBQ sauce, apple cider vinegar.", ingredients:"2 lbs chicken breast, low-sugar BBQ sauce, apple cider vinegar, garlic powder", tip:"Easiest crockpot meal on the list.", search:"crockpot BBQ pulled chicken recipe", url:"https://easychickenrecipes.com/crockpot-bbq-pulled-chicken/" },
+  { id:32, title:"Buffalo Chicken (Crockpot)", time:"5 min prep", tags:["chicken","bowl","crockpot","you"], notes:"Chicken breast, Frank's RedHot, broth, garlic powder.", ingredients:"2 lbs chicken breast, Frank's RedHot, chicken broth, garlic powder, onion powder", tip:"Serve over rice with ranch drizzle.", search:"crockpot buffalo chicken recipe", url:"https://realfoodwholelife.com/recipes/slow-cooker-buffalo-chicken/" },
+  { id:33, title:"Teriyaki Chicken Bowl (Crockpot)", time:"10 min prep", tags:["chicken","asian","bowl","crockpot"], notes:"Chicken thighs in homemade teriyaki, shredded over jasmine rice with yum-yum sauce.", ingredients:"3 lbs chicken thighs, liquid aminos, soy sauce, mirin, honey, cornstarch, jasmine rice, mayo, Greek yogurt, sriracha", tip:"Yum-yum sauce is what makes it. Kid-friendly.", search:"crockpot teriyaki chicken bowl recipe", url:"https://www.sixsistersstuff.com/recipe/slow-cooker-chicken-teriyaki-bowl/" },
+  { id:34, title:"Teriyaki Meatballs (Crockpot)", time:"15 min prep", tags:["bowl","asian","crockpot"], notes:"Lean ground beef meatballs in homemade teriyaki sauce, over rice.", ingredients:"2 lbs lean ground beef, egg, breadcrumbs, garlic powder, liquid aminos, soy sauce, mirin, honey", tip:"Great change of pace from chicken.", search:"crockpot teriyaki meatballs recipe", url:"https://chefsavvy.com/teriyaki-beef-meatballs/" },
+  { id:36, title:"Chicken Alfredo (Crockpot)", time:"10 min prep", tags:["chicken","crockpot"], notes:"Chicken breast in lemon-parmesan broth, mixed with protein pasta and Alfredo sauce.", ingredients:"Chicken breast, parmesan, lemon, butter, garlic powder, protein pasta, cottage cheese, cream cheese, milk", tip:"Surprisingly creamy. Good on a heavier activity day.", search:"healthy chicken alfredo crockpot recipe", url:"https://easychickenrecipes.com/crockpot-chicken-alfredo/" },
+  { id:37, title:"Sheet Pan Salmon + Veggies", time:"30 min", tags:["fish","you"], notes:"Salmon fillets with broccoli, zucchini, bell pepper at 400°F.", ingredients:"Salmon fillets, broccoli, zucchini, bell pepper, olive oil, garlic powder, paprika, lemon", tip:"One of the simplest fish dinners — oven does everything.", search:"sheet pan salmon vegetables recipe", url:"https://dashfordinner.com/sheet-pan-salmon-and-veggies/" },
+  { id:38, title:"Turkey Meatballs + Potatoes", time:"30 min", tags:["you"], notes:"Ground turkey meatballs, baby potatoes, green beans on one sheet pan.", ingredients:"Ground turkey, egg, panko breadcrumbs, garlic powder, Italian seasoning, baby potatoes, green beans, olive oil", tip:"Add green beans in the last 15 min so they don't overcook.", search:"turkey meatballs sheet pan potatoes green beans", url:"https://www.greatgrubdelicioustreats.com/sheet-pan-meatballs-potatoes-green-beans/" }
 ];
 const DEFAULT_TAG_LABELS = {
   chicken:["tag-chicken","🍗 Chicken"], fish:["tag-fish","🐟 Fish"], mexican:["tag-mexican","🌮 Mexican"],
@@ -459,18 +459,20 @@ const DEFAULT_TAG_LABELS = {
 };
 
 const DEFAULT_BASICS = [
-  { cat:"🥖 Bread & Dairy", label:"Sourdough bread" },
-  { cat:"🥖 Bread & Dairy", label:"Dave's Killer Bread" },
-  { cat:"🥖 Bread & Dairy", label:"Whole milk" },
-  { cat:"🥖 Bread & Dairy", label:"Half & half", sub:"not every week" },
-  { cat:"🥖 Bread & Dairy", label:"Eggs" },
-  { cat:"🥖 Bread & Dairy", label:"Butter" },
-  { cat:"🥖 Bread & Dairy", label:"Sliced cheese" },
-  { cat:"🥣 Yogurt & Protein", label:"Oikos yogurt" },
-  { cat:"🥣 Yogurt & Protein", label:"Regular yogurt" },
-  { cat:"🥣 Yogurt & Protein", label:"Cottage cheese" },
-  { cat:"🥣 Yogurt & Protein", label:"Deli turkey" },
-  { cat:"🥣 Yogurt & Protein", label:"Rotisserie chicken" },
+  { cat:"🥛 Dairy", label:"Whole milk" },
+  { cat:"🥛 Dairy", label:"Half & half", sub:"not every week" },
+  { cat:"🥛 Dairy", label:"Eggs" },
+  { cat:"🥛 Dairy", label:"Butter" },
+  { cat:"🥛 Dairy", label:"Sliced cheese" },
+  { cat:"🥛 Dairy", label:"Oikos yogurt" },
+  { cat:"🥛 Dairy", label:"Regular yogurt" },
+  { cat:"🥛 Dairy", label:"Cottage cheese" },
+  { cat:"🥛 Dairy", label:"Parmesan" },
+  { cat:"🍞 Bakery", label:"Sourdough bread" },
+  { cat:"🍞 Bakery", label:"Dave's Killer Bread" },
+  { cat:"🍞 Bakery", label:"Tortillas" },
+  { cat:"🥩 Meat", label:"Deli turkey" },
+  { cat:"🥩 Meat", label:"Rotisserie chicken" },
   { cat:"🥑 Produce", label:"Bananas" },
   { cat:"🥑 Produce", label:"Apples" },
   { cat:"🥑 Produce", label:"Berries" },
@@ -479,18 +481,44 @@ const DEFAULT_BASICS = [
   { cat:"🥑 Produce", label:"Salad greens / butter lettuce" },
   { cat:"🥑 Produce", label:"Red onion" },
   { cat:"🥑 Produce", label:"Lemons / limes" },
-  { cat:"🥫 Pantry Staples", label:"Olive oil" },
-  { cat:"🥫 Pantry Staples", label:"Garlic" },
-  { cat:"🥫 Pantry Staples", label:"Amy's burritos", sub:"freezer backup" },
-  { cat:"🥫 Pantry Staples", label:"Canned black beans" },
-  { cat:"🥫 Pantry Staples", label:"Rice or farro" },
-  { cat:"🥫 Pantry Staples", label:"Soy sauce / liquid aminos" },
-  { cat:"🥫 Pantry Staples", label:"Tortillas" },
-  { cat:"🥫 Pantry Staples", label:"Parmesan" },
-  { cat:"🍷 Drinks & Other", label:"Sparkling water" },
-  { cat:"🍷 Drinks & Other", label:"Wine" },
-  { cat:"🍷 Drinks & Other", label:"Coffee / creamer" },
+  { cat:"🥑 Produce", label:"Garlic" },
+  { cat:"🧊 Frozen", label:"Amy's burritos", sub:"freezer backup" },
+  { cat:"🥫 Pantry", label:"Olive oil" },
+  { cat:"🥫 Pantry", label:"Canned black beans" },
+  { cat:"🥫 Pantry", label:"Rice or farro" },
+  { cat:"🥫 Pantry", label:"Soy sauce / liquid aminos" },
+  { cat:"🛒 Other", label:"Sparkling water" },
+  { cat:"🛒 Other", label:"Wine" },
+  { cat:"🛒 Other", label:"Coffee / creamer" },
 ];
+
+// 7-category classifier for grocery store sections. Used both for basics
+// (which already declare a cat) and for recipe-sourced ingredients (which
+// don't — we guess their category from the ingredient name itself).
+const GROCERY_CATEGORIES = ["🥛 Dairy", "🥩 Meat", "🍞 Bakery", "🥑 Produce", "🧊 Frozen", "🥫 Pantry", "🛒 Other"];
+
+const CATEGORY_KEYWORDS = {
+  "🥛 Dairy": ["milk","cheese","yogurt","butter","cream","egg","feta","parmesan","mozzarella","cheddar","sour cream","cottage cheese","tzatziki","half and half","half & half","ricotta","cream cheese"],
+  "🥩 Meat": ["chicken","beef","turkey","pork","lamb","sausage","bacon","ground beef","ground turkey","steak","meatball","salmon","tilapia","cod","fish","shrimp","fillet","thigh","breast","deli turkey","rotisserie","ham"],
+  "🍞 Bakery": ["bread","bun","tortilla","pita","bagel","roll","naan","brioche","baguette"],
+  "🥑 Produce": ["onion","garlic","tomato","lettuce","cucumber","avocado","lemon","lime","pepper","cilantro","parsley","basil","mint","spinach","kale","broccoli","zucchini","carrot","potato","apple","banana","berry","berries","mango","scallion","green onion","ginger","cabbage","corn","celery","mushroom","squash","green beans","shallot","jalapeno","jalapeño","produce","herbs","fruit","vegetable"],
+  "🧊 Frozen": ["frozen","burrito","ice cream","peas","frozen veg"],
+  "🥫 Pantry": ["oil","sauce","vinegar","rice","pasta","noodle","bean","chickpea","broth","stock","spice","cumin","paprika","oregano","cinnamon","turmeric","salt","pepper","sugar","honey","flour","cornstarch","seasoning","tahini","peanut butter","soy sauce","salsa","enchilada","coconut milk","canned","jar","liquid aminos","sriracha","hot sauce","mustard","ketchup","mayo","mayonnaise","panko","breadcrumb","farro","quinoa","orzo","olives","capers","pesto"],
+  "🛒 Other": []
+};
+
+function guessCategory(ingredientName) {
+  const lower = ingredientName.toLowerCase();
+  // "frozen X" should always win regardless of what X is (frozen spinach,
+  // frozen peas, frozen chicken, etc.) — check this before the general
+  // keyword loop so it doesn't lose to e.g. "spinach" -> Produce.
+  if (/\bfrozen\b/.test(lower)) return "🧊 Frozen";
+  for (const cat of GROCERY_CATEGORIES) {
+    const keywords = CATEGORY_KEYWORDS[cat] || [];
+    if (keywords.some(kw => lower.includes(kw))) return cat;
+  }
+  return "🛒 Other";
+}
 
 // ─── STATE ─────────────────────────────────────────────────
 function loadJSON(key, fallback) {
@@ -916,7 +944,7 @@ function formatParsedIngredient(p) {
 // "2 lbs chicken breast" even though they're clearly the same item. Now any
 // match on core name merges into a single line; we just don't try to sum a
 // number when one side has no quantity (we keep whichever info we have).
-function mergeIntoAccumulator(acc, parsed, source) {
+function mergeIntoAccumulator(acc, parsed, source, category) {
   const core = coreIngredientName(parsed.name);
   if (!core) return false;
   const group = parsed.unit ? unitGroup(parsed.unit) : null;
@@ -926,6 +954,12 @@ function mergeIntoAccumulator(acc, parsed, source) {
     if (existingCore !== core) continue;
 
     const existingGroup = existing._parsed.unit ? unitGroup(existing._parsed.unit) : null;
+
+    // A basics-declared category is more trustworthy than a guessed one
+    // (guessed from keyword matching on a recipe ingredient name) — if the
+    // existing line came from basics, keep its category; otherwise take
+    // whichever category this merge brings in.
+    if (!existing.isBasic && category) existing.category = category;
 
     // Both have parseable, compatible-group quantities -> sum them
     if (parsed.amount !== null && existing._parsed.amount !== null && group && group === existingGroup) {
@@ -984,33 +1018,36 @@ function addSource(item, source) {
 function rebuildShoppingList() {
   const acc = [];
 
-  // 1. Weekly basics always go in first
+  // 1. Weekly basics always go in first — they carry their own declared category
   basics.forEach(b => {
     const parsed = parseIngredientLine(b.label);
     parsed.displayName = b.label; // keep original casing/phrasing for basics
-    if (!mergeIntoAccumulator(acc, parsed, 'Weekly basic')) {
-      acc.push({ label: formatParsedIngredient(parsed), source: 'Weekly basic', sources: ['Weekly basic'], _parsed: parsed, isBasic: true });
+    if (!mergeIntoAccumulator(acc, parsed, 'Weekly basic', b.cat)) {
+      acc.push({ label: formatParsedIngredient(parsed), source: 'Weekly basic', sources: ['Weekly basic'], _parsed: parsed, isBasic: true, category: b.cat });
     }
   });
 
-  // 2. Ingredients from every selected meal
+  // 2. Ingredients from every selected meal — category is guessed from the
+  // ingredient name itself, since recipes don't declare one
   selectedMealIds.forEach(id => {
     const m = meals.find(x=>x.id===id);
     if (!m || !m.ingredients) return;
     const lines = m.ingredients.split(',').map(s=>s.trim()).filter(Boolean);
     lines.forEach(label => {
       const parsed = parseIngredientLine(label);
-      if (!mergeIntoAccumulator(acc, parsed, m.title)) {
-        acc.push({ label: formatParsedIngredient(parsed), source: m.title, sources: [m.title], _parsed: parsed, isBasic: false });
+      const guessedCat = guessCategory(parsed.name);
+      if (!mergeIntoAccumulator(acc, parsed, m.title, guessedCat)) {
+        acc.push({ label: formatParsedIngredient(parsed), source: m.title, sources: [m.title], _parsed: parsed, isBasic: false, category: guessedCat });
       }
     });
   });
 
-  // 3. Manually added one-off items
+  // 3. Manually added one-off items — also auto-categorized
   manualItems.forEach(label => {
     const parsed = parseIngredientLine(label);
-    if (!mergeIntoAccumulator(acc, parsed, 'Added manually')) {
-      acc.push({ label: formatParsedIngredient(parsed), source: 'Added manually', sources: ['Added manually'], _parsed: parsed, isBasic: false });
+    const guessedCat = guessCategory(parsed.name);
+    if (!mergeIntoAccumulator(acc, parsed, 'Added manually', guessedCat)) {
+      acc.push({ label: formatParsedIngredient(parsed), source: 'Added manually', sources: ['Added manually'], _parsed: parsed, isBasic: false, category: guessedCat });
     }
   });
 
@@ -1024,28 +1061,21 @@ function renderShoppingList() {
     grid.innerHTML = '<div class="empty"><h3>Your list is empty</h3><p>Add weekly basics in Manage Basics, or select meals in the Dinner Rotation tab</p></div>';
     return;
   }
-  // Group by category: basics keep their original category, recipe-sourced
-  // items get grouped under "From this week's meals"
-  const basicsByCat = {};
-  const fromMeals = [];
+  // Group ALL items — basics and recipe ingredients alike — into the same
+  // 7 grocery-store sections, in a fixed shopping order.
+  const byCat = {};
   shoppingItems.forEach((item, i) => {
-    if (item.isBasic) {
-      const origBasic = basics.find(b => coreIngredientName(parseIngredientLine(b.label).name) === coreIngredientName(item._parsed.name));
-      const cat = origBasic ? origBasic.cat : '🥫 Other Basics';
-      if (!basicsByCat[cat]) basicsByCat[cat] = [];
-      basicsByCat[cat].push(i);
-    } else {
-      fromMeals.push(i);
-    }
+    const cat = item.category || '🛒 Other';
+    if (!byCat[cat]) byCat[cat] = [];
+    byCat[cat].push(i);
   });
 
   let html = '';
-  Object.entries(basicsByCat).forEach(([cat, indices]) => {
-    html += renderShoppingSection(cat, indices);
+  GROCERY_CATEGORIES.forEach(cat => {
+    if (byCat[cat] && byCat[cat].length) {
+      html += renderShoppingSection(cat, byCat[cat]);
+    }
   });
-  if (fromMeals.length) {
-    html += renderShoppingSection('🍽 From This Week\'s Meals', fromMeals);
-  }
   grid.innerHTML = html;
 }
 
@@ -1107,6 +1137,27 @@ function quickAdd() {
 }
 
 function uncheckAll() { checkedShopping = {}; saveCheckedShopping(); renderShoppingList(); }
+
+// Full weekly reset: clears selected meals, the pending cart, any manually
+// added one-off items, and all checked-off state — basically everything
+// that's specific to "this week." Your dinner rotation (all 38+ meals) and
+// your weekly basics list are untouched, since those are meant to persist
+// permanently across weeks.
+function startNewWeek() {
+  if (!confirm("Start a new week? This clears this week's selected meals, manual items, and checkmarks. Your dinner rotation and weekly basics stay exactly as they are.")) return;
+  selectedMealIds = [];
+  cartMealIds = [];
+  manualItems = [];
+  checkedShopping = {};
+  saveSelectedMeals(); saveCart(); saveManualItems(); saveCheckedShopping();
+  rebuildShoppingList();
+  renderShoppingList();
+  renderSelectedMeals();
+  renderGrid();
+  updateCartBar();
+  document.getElementById('weekOf').value = '';
+  showToast('New week started — rotation and basics kept');
+}
 
 // ═══════════════ SELECTED MEALS TAB ═════════════════════════════
 function renderSelectedMeals() {
